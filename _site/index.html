@@ -1,12 +1,35 @@
----
-layout: default
----
-<div class="home">
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test Page: Don't Panic</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+  <body>
+    <header class="header">
+    <nav>
+        <ul class="header-nav nav-links">
+          <li><a href="/">Home</a></li>
+<li><a href="/gallery">Gallery</a></li>
+<li><a href="/blog">Blog</a></li>
+<li><a href="/2017/11/21/title-of-post.html">Newest Post</a></li>
+        </ul>
+    </nav>
+    <a href="/" class="header-logo">
+    <img src="/images/logo.png" alt="Learn Enough">
+    </a>
+</header>
+
+ 
+   <div class="content-container">
+      <div class="home">
 <div class="full-hero hero-home">
   <div class="hero-content">
     <h1>CODE DANGEROUSLY</h1>
     <ul class="social-list">
-      {% include social-links.html %}
+      <li><a href="http://example.com/" class="social-links">Fb</a></li>
+<li><a href="http://example.com/" class="social-links">Tw</a></li>
+<li><a href="http://example.com/" class="social-links">Gh</a></li>
      </ul>
   </div>
  </div>
@@ -49,20 +72,26 @@ layout: default
   <div class="blog-posts">
     <header class="post-header">
       <h2>
-        <a href="{{ site.posts.first.url }}">
-        {{ site.posts.first.title }}</a>
+        <a href="/2017/11/21/title-of-post.html">
+        This is the title of the post</a>
       </h2>
       <div class="post-byline">
-        <img src="{{ site.posts.first.gravatar }}">
-        <a href="{{ site.posts.first.authorTwitter }}"
+        <img src="https://gravatar.com/avatar/ffda7d145b83c4b118f982401f962ca6?s=150">
+        <a href="http://twitter.com/mhartl"
         class="social-link">Tw</a>
-        by: {{ site.posts.first.author }}
-        <span> - {{ site.posts.first.date | date: '%B %d, %Y' }}</span>
+        by: Me, Myself, and I
+        <span> - November 21, 2017</span>
       </div>
     </header>
     <div class="posts-image"
-    style="background-image:url({{ site.posts.first.postHero }})"></div>
-    {{ site.posts.first.excerpt }}
+    style="background-image:url(/images/shark.jpg)"></div>
+    <p>Call me <em>Ishmael</em>. Some years ago–<em>never mind how long
+precisely</em>–having little or no money in my purse, and nothing
+particular to interest me on shore, I thought I would sail about a little
+and see the watery part of the world. It is a way I have of driving off
+the spleen and regulating the circulation.</p>
+
+
   </div>
 </div>
 
@@ -134,3 +163,30 @@ layout: default
   </div>
 </div>
 </div>
+    </div>
+    <footer class="footer">
+  <a class="footer-logo" href="/">
+    <img src="/images/logo.png" alt="Learn Enough"/>
+  </a>
+  <nav>
+    <ul class="footer-nav nav-links">
+      <li><a href="/">Home</a></li>
+<li><a href="/gallery">Gallery</a></li>
+<li><a href="/blog">Blog</a></li>
+<li><a href="/2017/11/21/title-of-post.html">Newest Post</a></li>
+    </ul>
+  </nav>
+    <h3>Learn Enough <span>to Be Dangerous</span></h3>
+    <br>
+  <nav>
+    <ul class="social-list">
+      <li><a href="http://example.com/" class="social-links">Fb</a></li>
+<li><a href="http://example.com/" class="social-links">Tw</a></li>
+<li><a href="http://example.com/" class="social-links">Gh</a></li>
+    </ul>  
+  </nav>
+</footer>
+
+
+  </body>
+</html>
