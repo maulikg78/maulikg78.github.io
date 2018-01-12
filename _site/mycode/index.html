@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test Page: Don't Panic</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+  <body>
+    <header class="header">
+    <nav>
+        <ul class="header-nav nav-links">
+          <li><a href="/">Home</a></li>
+<li><a href="/gallery">Gallery</a></li>
+<li><a href="/blog">Blog</a></li>
+<li><a href="/mycode">MyCode</a></li>
+<li><a href="/2017/11/21/title-of-post.html">Newest Post</a></li>
+        </ul>
+    </nav>
+    <a href="/" class="header-logo">
+    <img src="/images/logo.png" alt="Learn Enough">
+    </a>
+</header>
+
+ 
+   <div class="content-container">
+      <div class="home">
+<div class="mycode-section">
+  <h2> Tile Catalog </h2>
+  <div class="tile-wrapper">
+      
+    <div class="tile-box">
+      <h3>My Route</h3>
+      <iframe id="maps" src="https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d482676.05143371545!2d72.74198573346584!3d19.067841431681888!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e0!4m5!1s0x3be7c3a9e4ecbad3%3A0x9fb938081011325f!2sNeelsidhi+Splendour%2C+Sector+15%2C+CBD+Belapur%2C+Navi+Mumbai%2C+Maharashtra+400614%2C+India!3m2!1d19.0086759!2d73.03476739999999!4m5!1s0x3be7c0beddab5c77%3A0xd2f7874862ef69dd!2sReliance+Corporate+Park%2C+MIDC%2C+Ghansoli%2C+Navi+Mumbai%2C+Maharashtra+400701%2C+India!3m2!1d19.1275105!2d73.0076079!5e0!3m2!1sen!2sin!4v1515140868072" frameborder="0" style="border:0" allowfullscreen></iframe>
+      <div class="Notes">
+        <p> From Home to Office using Google maps </p>
+      </div>
+    </div>
+    
+    <div class="tile-box">
+      <h3>My Fav Movies</h3>
+        <p>First</p>
+        <a id="imageLink0">
+          <!--<p id="myImage0">First</p>-->
+          <img id="myImage0" alt="Movie" frameborder="0" style="border:0" allowfullscreen>
+        </a>
+        <p>Second</p>
+        <a id="imageLink1">
+          <!--<p id="myImage1">Second</p>-->
+          <img id="myImage1" alt="Movie" frameborder="0" style="border:0" allowfullscreen>
+        </a>
+        <p>Third</p>
+        <a id="imageLink2">
+          <!--<p id="myImage2">Third</p>-->
+          <img id="myImage2" alt="Movie" frameborder="0" style="border:0" allowfullscreen>
+        </a>
+    </div>
+    <div class="tile-box">
+      <!--<img src="http://placekitten.com/g/400/400">-->
+      <h3>My Stock Watch</h3>
+        <p>First</p>
+        <p id="myStock0">First</p>
+        <p>Second</p>
+        <p id="myStock1">Second</p>
+        <p>Third</p>
+        <p id="myStock2">Third</p>
+    </div>
+<!--For tile Wrapper DIV -->  
+  </div>
+</div>
+<!--<div class="page">-->
+<div class="mycode-section">
+  <h2>My JavaScript Code</h2>
+  <div class="col-two">
+    <div class="col col-content">
+    
+        <!--// <label for="file-input">-->
+        <!--//   Open File-->
+        <!--//   <input type="file" id="file-input">-->
+        <!--// </label>-->
+        <!--// <p id="demo">A Paragraph</p>-->
+        <!--// <button type="button" onclick="myFunction()">Try it</button>-->
+        <!--// <script>-->
+        <!--//   function myFunction() {-->
+        <!--//     document.getElementById("demo").innerHTML = "Paragraph changed.";-->
+        <!--// }-->
+        <!--// </script>-->
+    
+        <p id="demo">A Paragraph</p>
+        <!--<iframe width="560" height="315" src="https://www.youtube.com/embed/GBaHPND2QJg" frameborder="0" gesture="media" allow="encrypted-media" allowfullscreen></iframe>-->
+        <!--<iframe src="https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d482676.05143371545!2d72.74198573346584!3d19.067841431681888!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e0!4m5!1s0x3be7c3a9e4ecbad3%3A0x9fb938081011325f!2sNeelsidhi+Splendour%2C+Sector+15%2C+CBD+Belapur%2C+Navi+Mumbai%2C+Maharashtra+400614%2C+India!3m2!1d19.0086759!2d73.03476739999999!4m5!1s0x3be7c0beddab5c77%3A0xd2f7874862ef69dd!2sReliance+Corporate+Park%2C+MIDC%2C+Ghansoli%2C+Navi+Mumbai%2C+Maharashtra+400701%2C+India!3m2!1d19.1275105!2d73.0076079!5e0!3m2!1sen!2sin!4v1515140868072" frameborder="0" style="border:0" allowfullscreen></iframe>-->
+        <!--<iframe src="http://www.imdb.com/user/ur34882883/ratings?ref_=nv_usr_rt_4" width="800" height="1000" frameborder="10" style="border:1" allowfullscreen></iframe>-->
+        <!--<iframe src="http://www.imdb.com/title/tt1001526/mediaviewer/rm2836562176" width="800" height="1000" frameborder="0" style="border:0" allowfullscreen></iframe>-->
+        
+<script>
+let api_key='e16685610255dd6967f3421eef7ea3bc';
+let url_start = 'https://api.themoviedb.org/3/find/';
+let url_end = '?api_key=' + api_key + '&language=en-US&external_source=imdb_id';
+let posterpath = "";
+let url2 = 'http://image.tmdb.org/t/p/original';
+let imdb_ref = 'http://www.imdb.com/title/';
+
+
+async function GetMovieImage(id, movie_key) {
+  try {
+   let url = url_start + movie_key + url_end;
+   console.log(url);
+   let response = await fetch(url);
+   
+   if(response.ok) {
+     let jsonResponse = await response.json();
+     let imageMap = "myImage" + id;
+     let imageLink = "imageLink" + id;
+     console.log(imageMap);
+     posterpath = await jsonResponse.movie_results[0].poster_path;
+     let url3 = url2 + posterpath;
+     console.log(url3);
+     document.getElementById(imageMap).src = url3;
+     document.getElementById(imageLink).href = imdb_ref + movie_key;
+     return jsonResponse;
+   }
+   throw new Error('Request failed');
+  } catch(error) {
+    console.log(error);
+  }
+}
+
+
+function GetNPV(values, dates, rate) {
+  let npv=0;
+  let date1 = new Date(dates[0]);
+  for(let itr=0;itr<values.length;itr++) {
+     let date2 = new Date(dates[itr]);
+     let datediff = (date2 - date1)/(1000*60*60*24);
+     let value = ( values[itr] / Math.pow(1+rate,datediff/365) );
+     npv += value;
+  }
+  return npv;
+}
+
+function precisionRound(number, precision) {
+  let factor = Math.pow(10, precision);
+  return Math.round(number * factor) / factor;
+}
+
+function GetXIRR(values, dates) {
+  let rate = 0;
+  let precisenpv = undefined;
+  let previousnpv = undefined;
+  let ctr = 0;
+  let itr=0;
+  for (; itr < 10000; itr++) {
+    let npv = GetNPV(values, dates, rate);
+    precisenpv = precisionRound(npv,2);
+    
+    if (precisenpv == 0) { 
+      break; 
+    } else if (precisenpv < 0 ) {
+      if (Math.abs(ctr) > 5 && ctr > 0 ) {
+        rate -= 0.01;
+        break;
+      } else { ctr--; rate -= 0.01;} 
+    } else if (precisenpv > 0) {
+      if (Math.abs(ctr) > 5 && ctr < 0) {
+        rate += 0.01;
+        break;
+      } else { ctr++; rate += 0.01;}
+    }
+  }
+  return precisionRound(rate,2);
+}
+
+function GetDate_YYYYMMDD_withDash() {
+   let myDate = new Date();
+   let date = myDate.getDate();
+   if (date < 10) {date = "0" + date;}
+   let month = myDate.getMonth();
+   if (month+1 < 10) {month = "0" + (month+1);} else {month++;}
+   let year = myDate.getFullYear();
+   let date_key = year + "-" + month + "-" + date;   
+   return date_key;
+}
+
+async function GetStockQuotes(id, stockcode) {
+   try {
+   let av_api_key = "2O5D20VZB8TTSDJR";
+ //  https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=1min&apikey=demo
+   let av_url_start = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=";
+   let av_url_end = "&interval=1min&apikey="+av_api_key;
+   
+   let url = av_url_start+stockcode+av_url_end;
+   
+   let date_key = GetDate_YYYYMMDD_withDash();
+   let keyOne = "Time Series (Daily)";
+   let keyTwo = "4. close";
+   let docKey = "myStock"+id;
+   
+   console.log(url);
+   
+   let response = await fetch(url);
+   
+   if(response.ok) {
+     let jsonResponse = await response.json();
+     console.log(jsonResponse);
+   //  console.log(jsonResponse[keyOne][date_key][keyTwo]);
+  //   document.getElementById(docKey).innerHTML = jsonResponse[keyOne][date_key][keyTwo];
+     
+     // console.log(jsonResponse["Time Series (Daily)"][date_key]["1. open"]);
+     return jsonResponse;
+   }
+   throw new Error('Request failed');
+  } catch(error) {
+    console.log(error);
+  }
+}
+
+function GetTransactionValue(tx) {
+  let value = 0;
+  let tx_val = tx[4]*tx[5];
+  let charges = tx[6] + tx[7] + tx[8];
+  
+  if (tx[3] == "Buy") {
+    value = -(tx_val + charges);
+  } else if (tx[3] == "Sell") {
+    value = tx_val - charges; 
+  } else {
+    console.log("Error");
+  }
+  return value;
+}
+
+function TranslateExcelDate(date) {
+  return new Date((date - (25567+2))*86400*1000);
+}
+
+function ReadICICIDirectTransactionFile(table) {
+    let index = 1;
+    let portfolio = [];
+
+    for(let itr=0;index<table.length;index++, itr++) {
+     
+      let symb = table[index][0];
+      let txns = [];
+      let dates = [];
+      let stkcnt = 0; 
+      let stockObj = { symbol: "Adani",
+                       stockname: "Adani Ports",
+                       stockcount: 0,
+                       xirr: 1.5
+                     };
+      
+      stockObj.stockname = table[index][1];
+      for (let itr2=0;index<table.length;itr2++,index++) {
+        
+        if (symb == table[index][0]) {
+          txns[itr2] = GetTransactionValue(table[index]);
+          dates[itr2] = TranslateExcelDate(table[index][12]); // need to be translated
+          stkcnt += (table[index][3]=="Buy"?table[index][4]:-table[index][4]);
+        } else {
+          index--;
+          break;
+        }
+      }
+
+      stockObj.symbol = symb;
+      stockObj.stockcount = stkcnt;
+      stockObj.xirr = GetXIRR(txns,dates);
+      portfolio[itr] = stockObj; 
+    }
+    return portfolio;
+}
+
+function FindTop3Stocks(stock) {
+  let obj,obj1,obj2,obj3 = undefined;
+  let object = [];
+  let itr=0;
+  
+  obj1=obj2=obj3=stock[0];
+  obj1.xirr = obj2.xirr = obj3.xirr = 0;
+  
+  console.log(itr);
+
+  for(;itr<stock.length;itr++) {
+    
+    
+    if (stock[itr].stockcount <= 0) { continue; }
+    
+    obj = stock[itr];
+    
+    if (obj.xirr > obj3.xirr) {
+      if (obj.xirr > obj2.xirr) {
+        if (obj.xirr > obj1.xirr) {
+          obj3 = obj2;
+          obj2 = obj1;
+          obj1 = obj;
+        } else {
+          obj3 = obj2;
+          obj2 = obj;
+        }
+      } else {
+        obj3 = obj;
+      }
+    }
+  }
+  object[0] = obj1;
+  object[1] = obj2;
+  object[2] = obj3;
+  console.log(object);
+  return object;
+}
+
+</script>
+
+
+        <!--<iframe src="https://docs.google.com/spreadsheets/d/1aCTgHGuPbqvc5aGiPaqbsy3775g-XHlRNezcZNBx5Sg/edit#gid=80382669" width="800" height="1000" frameborder="0" style="border:0" allowfullscreen></iframe>-->
+        <input type="file" id="fileinput" />
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.11.15/cpexcel.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.11.15/jszip.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.11.15/shim.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.11.15/xlsx.core.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.11.15/xlsx.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.11.15/xlsx.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.11.15/xlsx.full.min.js"></script>
+
+        <script type="text/javascript">
+        
+
+          // Check for the various File API support.
+          if (window.File && window.FileReader && window.FileList && window.Blob) {
+              // Great success! All the File APIs are supported.
+          } else {
+            alert('The File APIs are not fully supported in this browser.');
+          }
+
+          function readSingleFile(filelist1) {
+             
+              let file1 = document.getElementById('fileinput').files[0];
+              //Retrieve the first (and only!) File from the FileList object
+             // let file1 = filelist1.target.files[0]; 
+          
+              if (file1) {
+                
+                if(file1.type == 'text/plain') {
+                  alert("TEXT FILE");
+                  let reader = new FileReader();
+                  reader.onload = function(myFile) { 
+                   
+                   let contents = myFile.target.result;
+            	     
+                   let str = [];
+                   for (let i=0,j=0;j<2;j++) {
+                       str[j] = contents.substring(i, contents.indexOf(";",i));
+                       i += str[j].length + 2;
+                    }
+                   
+                   document.getElementById("demo").innerHTML = str[0] + str[1];
+                  
+                  };
+                  
+                  reader.readAsText(file1);
+                  
+                } else if (file1.type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+                  alert("EXCEL FILE");
+                  
+                  let reader = new FileReader();
+                  reader.onload = function(myFile) {
+    
+                    let data = myFile.target.result;
+                    let workbook = XLSX.read(data, {type: 'binary'});
+                    let sheetName = workbook.SheetNames[0];
+                    let ws = workbook.Sheets[sheetName];
+                    
+                    // read XL file into 2-D array
+                    let table = XLSX.utils.sheet_to_json(ws, {header:1,raw:true});
+                    
+                    // for passing value to XIRR calculator
+                    /* let values = [];
+
+                    for(let ir=0;ir<table.length;ir++) {
+                      let obj = {};
+                      obj.Date = table[ir][0];
+                      obj.Flow = table[ir][1];
+                      values[ir] = obj;
+                    }
+                       */  
+                    
+                    if (sheetName == "Movies") {
+                      for(let itr=0;itr<3;itr++) {
+                        GetMovieImage(itr,table[itr+1][0]);
+                      }  
+                    } else if (sheetName == "Stocks") {
+                      for(let itr=0;itr<3;itr++) {
+                        let stockCode = "NSE:"+table[itr+1][0];
+                        console.log(stockCode);
+                        GetStockQuotes(itr, stockCode);
+                      }  
+                    } else if (sheetName == "Portfolio") {
+                        let values=[];
+                        let dates=[];
+                        for(let itr1 = 0; itr1<table.length; itr1++) {
+                            values[itr1] = table[itr1][0];
+                            dates[itr1] = table[itr1][1];
+                        }
+                        console.log(values);
+                        console.log(dates);
+                        let rate = GetXIRR(values,dates);
+                        console.log(rate*100 + "%");
+                    } else if (sheetName == "Transactions") {
+
+                        let stock = ReadICICIDirectTransactionFile(table);
+                        let top3 = FindTop3Stocks(stock);
+                        let tag = "myStock";
+                        
+                        for(let itr=0;itr<3;itr++) {
+                          let newtag = tag + itr; 
+                          document.getElementById(newtag).innerHTML = (itr+1) + ". " + top3[itr].stockname + " XIRR: " + top3[itr].xirr;
+                        }
+                        
+                    } else {
+                      console.log(table);
+                    }
+                    
+                    /*
+                      
+                    for(let R = 0; R <= 4; ++R) {
+                    //  let row = [];
+                      for(let C = 0; C <= 4; ++C) {
+                        let cell_address = {c:C, r:R};
+                         if an A1-style address is needed, encode the address
+                        let cell_ref = XLSX.utils.encode_cell(cell_address);
+                        console.log(workbook.Sheets[sheetName][cell_ref]);
+                      }
+                    }
+                    
+                  // for(let i=0;i<workbook.)
+                  //  console.log(workbook.Sheets[workbook.SheetNames[0]].A1);
+                  //  console.log(workbook.Strings);
+                  
+                  /*  workbook.SheetNames.forEach(function(sheetName) {
+                      // Here is your object
+                      let XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName],2);
+                      console.log(XL_row_object);
+                    }); */
+                  };
+            
+                reader.onerror = function(error) {
+                  console.log(error);
+                };
+            
+                reader.readAsBinaryString(file1);
+              }
+            } else { 
+                alert("Failed to load file");
+            }
+          }
+            
+          document.getElementById('fileinput').addEventListener('change', readSingleFile, false);
+          
+        </script>
+    </div>
+    </div>
+  <!--</div>-->
+<!--For Home Section DIV -->
+</div> 
+<!--For Home DIV -->
+</div>
+
+    </div>
+    <footer class="footer">
+  <a class="footer-logo" href="/">
+    <img src="/images/logo.png" alt="Learn Enough"/>
+  </a>
+  <nav>
+    <ul class="footer-nav nav-links">
+      <li><a href="/">Home</a></li>
+<li><a href="/gallery">Gallery</a></li>
+<li><a href="/blog">Blog</a></li>
+<li><a href="/mycode">MyCode</a></li>
+<li><a href="/2017/11/21/title-of-post.html">Newest Post</a></li>
+    </ul>
+  </nav>
+    <h3>Learn Enough <span>to Be Dangerous</span></h3>
+    <br>
+  <nav>
+    <ul class="social-list">
+      <li><a href="http://example.com/" class="social-links">Fb</a></li>
+<li><a href="http://example.com/" class="social-links">Tw</a></li>
+<li><a href="http://example.com/" class="social-links">Gh</a></li>
+    </ul>  
+  </nav>
+</footer>
+
+
+  </body>
+</html>

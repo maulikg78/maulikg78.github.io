@@ -1,3 +1,4 @@
+/* HTML & CSS reset */
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -15,11 +16,13 @@ summary, time, mark, audio, video {
   font: inherit;
   vertical-align: baseline;
 }
+
 /* HTML5 display-role reset for older browsers */
 article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
   display: block;
 }
+
 body {
   line-height: 1;
 }
@@ -228,7 +231,7 @@ h4 {
 /* PAGE STYLES */
 .page {
   margin: 10vh auto 15vh;
-  max-width: 980px;
+  max-width: 960px;
   width: 85vw;
 }
 .page h1 {
@@ -464,16 +467,65 @@ h4 {
   margin: 0 0.5em;
 }
 
+/* MYCODE STYLES */
+.mycode-section {
+  margin: auto;
+  width: 90vw;
+}
+
+.mycode-section h2 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.mycode-section h4 {
+  margin-bottom: 0.5em;
+  text-align: center;
+}
+
+.tile-wrapper {
+  font-size: 24px;
+  margin: auto;
+  overflow: hidden;
+  border: 1px solid black;
+}
+
+.tile-box {
+  box-sizing: border-box;
+  float: left;
+  font-size: 1rem;
+  margin: auto;
+  padding: 0 3%;
+  width: 33%;
+  /*border: 1px solid black;*/
+}
+
+.tile-box h3 {
+  /*color: #fff;*/
+  color: black;
+  font-size: 1.5em;
+  margin: 0 1em;
+  text-align: center;
+  text-transform: uppercase;
+}
+.tile-box img {
+  width: 100px;
+  height: 125px;
+  text-align: center;
+}
+
+.tile-box iframe {
+  width: 100%;
+  height: 450px;
+}
+
 /* HOMEPAGE STYLES */
 .home-section {
   margin: 6rem auto;
   max-width: 980px;
   width: 90vw;
 }
-.home-section h2 {
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
+
 .home-callout {
   display: flex;
   align-items: center;
@@ -507,9 +559,12 @@ h4 {
   margin-bottom: 0.5em;
   text-align: center;
 }
+
+/* styles for blog posts */
 .home-section .post-header {
   text-align: center;
 }
+
 .home-section .blog-posts {
   margin: auto;
   width: 75%;
@@ -530,6 +585,7 @@ h4 {
   margin: 6rem 0 0;
   padding: 0 3%;
   width: 33%;
+  /*border: 1px solid black;*/
 }
 .bio-box h3 {
   color: #fff;
