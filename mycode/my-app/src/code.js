@@ -85,7 +85,7 @@ function GetDate_YYYYMMDD_withDash() {
    let date_key = year + "-" + month + "-" + date;   
    return date_key;
 }
-
+/*
 async function GetStockQuotes(id, stockcode) {
    try {
    let av_api_key = "2O5D20VZB8TTSDJR";
@@ -118,6 +118,7 @@ async function GetStockQuotes(id, stockcode) {
     console.log(error);
   }
 }
+*/
 
 function GetTransactionValue(tx) {
   let value = 0;
