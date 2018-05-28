@@ -1,5 +1,5 @@
-var React = require('react');
-var ReactDOM = require('react-dom');
+//var React = require('react');
+//var ReactDOM = require('react-dom');
 var http = require('http');
 var dt = require('./myfirstmodule');
 var url = require('url');
