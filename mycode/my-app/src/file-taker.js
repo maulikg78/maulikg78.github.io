@@ -38,8 +38,19 @@ function GetXIRR(symbol, values, dates) {
   const increment = 0.001;
   const precision = 2;
   
+  /* debug
+  if (symbol === "INE412U01017") {
+    console.log("check XIRR"+values+"\n"+ dates);
+  }
+  */
+  
   for (; itr < (10/increment); itr++) {
     let npv = GetNPV(symbol, values, dates, rate);
+    /* debug
+    if (symbol === "INE412U01017") {
+      console.log("npv : "+npv+"rate : "+rate);
+    }
+    */
     prepreviousnpv = previousnpv;
     previousnpv = precisenpv;
     precisenpv = precisionRound(npv, precision);
@@ -60,15 +71,23 @@ function GetXIRR(symbol, values, dates) {
 
 function  GetTransactionValue(tx) {
     let value = 0;
-    let tx_val = tx[4]*tx[5];
-    let charges = tx[6] + tx[7] + tx[8];
+    //table reader
+    const TXTYPE = 3;
+    const STKQTY = 4;
+    const STKCOST = 5;
+    const BRKG = 6;
+    const TXCHG = 7;
+    const STPDTY = 8;
     
-    if (tx[3] == "Buy") {
+    let tx_val = tx[STKQTY]*tx[STKCOST];
+    let charges = tx[BRKG] + tx[TXCHG] + tx[STPDTY];
+    
+    if (tx[TXTYPE] == "Buy") {
       value = -(tx_val + charges);
-    } else if (tx[3] == "Sell") {
+    } else if (tx[TXTYPE] == "Sell") {
       value = tx_val - charges; 
     } else {
-      console.log("Error");
+      console.log("Invalid Transaction Type Error");
     }
     return value;
   }
@@ -78,14 +97,27 @@ function TranslateExcelDate(date) {
   }
 
 function findYestPrice(stkcode) {
-
+    
+    const STKCODE = 12;
+    const DAYLASTPRICE = 6;
+    
     for(let itr=0; itr<priceList.length; itr++) {
-      if (priceList[itr][0] === stkcode) {
-        return priceList[itr][6];
+      /*
+      if(stkcode === "INE412U01017") {
+        console.log("PriceList scroll"+ priceList[itr][STKCODE]);
+      }
+      */
+      if (priceList[itr][STKCODE] === stkcode) {
+        /*
+        if (stkcode === "INE412U01017") {
+          console.log("price "+priceList[itr][DAYLASTPRICE]+ " counter "+itr);
+        }
+        */
+        return priceList[itr][DAYLASTPRICE];
       } 
     }
     return 0;
-  }
+}
   
 function    GetDate_YYYYMMDD_withDash() {
      let myDate = new Date();
@@ -98,18 +130,169 @@ function    GetDate_YYYYMMDD_withDash() {
      return date_key;
   }
 
+function SeperateRealizedTransactions(symb, txns, dates, stk_tx_cnt) {
+  let stockTx = {
+                  txns: [],
+                  dates: [],
+                  stkcnt: [],
+                  r_txns: [],
+                  r_dates: [],
+                  r_stkcnt: []
+                };
+                
+  let stockFinalTx = {
+                        txns: [],
+                        dates: [],
+                        stkcnt: [],
+                        r_txns: [],
+                        r_dates: [],
+                        r_stkcnt: []
+                      };
+  
+  let i=0;              
+  for(;i<stk_tx_cnt.length-1;i++) {
+    
+    if (stk_tx_cnt[i] < 0) {
+
+      stockTx.txns[i] = stockTx.stkcnt[i] = 0;
+      stockTx.dates[i] = undefined;
+      stockTx.r_txns[i] = txns[i];
+      stockTx.r_dates[i] = dates[i];
+      stockTx.r_stkcnt[i] = stk_tx_cnt[i];
+    
+      
+    } else if (stk_tx_cnt[i] > 0) {
+
+      stockTx.r_txns[i] = stockTx.r_stkcnt[i] = 0;
+      stockTx.r_dates[i] = undefined;
+      stockTx.txns[i] = txns[i];
+      stockTx.dates[i] = dates[i];
+      stockTx.stkcnt[i] = stk_tx_cnt[i];
+      
+    }
+  }
+  
+  stockTx.r_txns[i] = stockTx.r_stkcnt[i] = 0;
+  stockTx.r_dates[i] = undefined;
+  stockTx.txns[i] = txns[i];
+  stockTx.dates[i] = dates[i];
+  stockTx.stkcnt[i] = stk_tx_cnt[i];
+  
+
+  for(let itr=0; itr<stk_tx_cnt.length-1;itr++) {
+    
+    let stkctr = stk_tx_cnt[itr];
+
+    if(stk_tx_cnt[itr] < 0) {
+      
+        // sell transaction 
+        for (let itr2=0; itr2 < stockTx.stkcnt.length && itr2 < itr; itr2++) {
+        
+          let average_value_per_share = stockTx.txns[itr2]/stockTx.stkcnt[itr2];
+         
+          if (stockTx.stkcnt[itr2] === 0) {
+
+            continue;
+ 
+          } else if (stockTx.stkcnt[itr2] >= Math.abs(stkctr)) {
+            
+            // add realized tx to 2nd array
+            stockTx.r_stkcnt[itr2] += (-stkctr);
+            stockTx.r_txns[itr2] += (average_value_per_share*(-stkctr));
+            stockTx.r_dates[itr2] = stockTx.dates[itr2];
+            
+           // update unrealized buy transaction
+           stockTx.stkcnt[itr2] += stkctr;
+           
+           if (stockTx.stkcnt[itr2] === 0) {
+             stockTx.txns[itr2] = 0;
+             stockTx.dates[itr2] = undefined;
+           } else {
+             stockTx.txns[itr2] = average_value_per_share*stockTx.stkcnt[itr2];
+           }
+           stkctr = 0;
+           break;
+           
+         } else {
+           // add the matched buy tx to 2nd array of realized tx & continue
+           stockTx.r_stkcnt[itr2] += stockTx.stkcnt[itr2];
+           stockTx.r_dates[itr2] = stockTx.dates[itr2];
+           stockTx.r_txns[itr2] += stockTx.txns[itr2];
+           
+  
+           stkctr += stockTx.stkcnt[itr2];
+
+           if (stkctr === 0) {
+             // ideally shouldn't be
+             console.log("don't come here");
+             break;
+           }
+           
+           // clear buy tx as it is moved to realized array
+           stockTx.stkcnt[itr2]=0;
+           stockTx.txns[itr2]=0;
+           stockTx.dates[itr2]=undefined;
+         }
+       }
+       
+    } else if (stk_tx_cnt[itr] > 0) {
+      // buy transaction 
+      continue;
+      
+    } else {
+      // 
+      alert("stock count for a transaction cannot be zero");
+      break;
+    }
+
+   // if(itr===6) { break; }
+  }
+  
+  //cleanTheArrays
+  let j = 0;
+  let k = 0;
+  for (i=0;i<stk_tx_cnt.length;i++) {
+    
+    if(stockTx.stkcnt[i] !== 0) {
+     stockFinalTx.stkcnt[j] = stockTx.stkcnt[i];
+     stockFinalTx.dates[j] = stockTx.dates[i];
+     stockFinalTx.txns[j] = stockTx.txns[i];
+     j++;
+    }
+    
+    if(stockTx.r_stkcnt[i] !== 0) {
+     stockFinalTx.r_stkcnt[k] = stockTx.r_stkcnt[i];
+     stockFinalTx.r_dates[k] = stockTx.r_dates[i];
+     stockFinalTx.r_txns[k] = stockTx.r_txns[i];
+     k++;
+    }
+    
+  }
+  
+  return stockFinalTx;
+}
+
+
+
+
 function   ReadICICIDirectTransactionFile(table) {
 
     let index = 1;
     let portfolio = [];
     let myDate = new Date();
     let stocks = 0;
-    const stksymb=14;
+    //table reader
+    const STKSYMB=2;
+    const STKNAME=1;
+    const TXDATE=12;
+    const TXTYPE=3;
+    const STKQTY=4;
+    const STKPRICE=15;
 
-    
     for(let itr=0;index<table.length;index++, itr++) {
      
-      let symb = table[index][stksymb];
+      let symb = table[index][STKSYMB];
+      let stock_tx_count = [];
       let txns = [];
       let dates = [];
       let stkcnt = 0; 
@@ -118,69 +301,96 @@ function   ReadICICIDirectTransactionFile(table) {
                        symbol: "Adani",
                        stockname: "Adani Ports",
                        stockcount: 0,
-                       xirr: 0
+                       xirr_overall : 0,
+                       xirr_realized : 0,
+                       xirr_unrealized : 0
                      };
+      let stockTransactions = {
+                                txns: [],
+                                dates: [],
+                                stkcnt: [],
+                                txns2: [],
+                                dates2: [],
+                                stkcnt2: []
+                              };
 
+      // PENDING : merge transactions if on same date and same type of tx
+      // PENDING : create a stock tx object and use that instead of seprate arrays
       
-      stockObj.stockname = table[index][1];
+      stockObj.stockname = table[index][STKNAME];
       for (let itr2=0;index<table.length;itr2++,index++) {
         
-        if (symb == table[index][stksymb]) {
+        if (symb == table[index][STKSYMB]) {
           txns[itr2] = GetTransactionValue(table[index]);
-          dates[itr2] = TranslateExcelDate(table[index][12]); // need to be translated
-          stkcnt += (table[index][3]=="Buy"?table[index][4]:-table[index][4]);
+          dates[itr2] = TranslateExcelDate(table[index][TXDATE]); // need to be translated
+          stock_tx_count[itr2] = (table[index][TXTYPE]=="Buy"?table[index][STKQTY]:-table[index][STKQTY]);
+          stkcnt += stock_tx_count[itr2];
+          
           if (index == table.length-1) {
-            let NSEStockCode = table[index][stksymb];
+            let NSEStockCode = table[index][STKSYMB];
             if(NSEStockCode == undefined) {
-              console.log("Error: "+table[index][stksymb]+" NSE code is not available");
+              console.log("Error: "+table[index][STKSYMB]+" NSE code is not available");
               txns[itr2+1] = 0;
             } else {
               if(priceList !== undefined) {
-                var code = table[index][stksymb];
+                // if (symb === "INE412U01017") { console.log("the end : PriceList is defined"); }
+                var code = table[index][STKSYMB];
                 txns[itr2+1] = findYestPrice(code)*stkcnt;
               } else {
-                txns[itr2+1] = table[index][15]*stkcnt;
+                // console.log("shouldn't come here");
+                txns[itr2+1] = table[index][STKPRICE]*stkcnt;
               }
             }
             dates[itr2+1] = myDate; 
+            stock_tx_count[itr2+1] = -stkcnt;
           }
         } else {
           index--;
-          let NSEStockCode = table[index][14];
+          let NSEStockCode = table[index][STKSYMB];
           if(NSEStockCode == undefined) {
-            console.log("Error: "+table[index][stksymb]+" NSE code is not available");
+            console.log("Error: "+table[index][STKSYMB]+" NSE code is not available");
             txns[itr2] = 0;
           } else {
             if(priceList !== undefined) {
-                var code = table[index][stksymb];
+                var code = table[index][STKSYMB];
                 txns[itr2] = findYestPrice(code)*stkcnt;
+                //if (symb === "INE412U01017") { console.log("next stock : PriceList is defined : code= "+code+" count: "+stkcnt); }
               } else {
-                txns[itr2] = table[index][15]*stkcnt;
+                //console.log("shouldn't come here");
+                txns[itr2] = table[index][STKPRICE]*stkcnt;
               }
           }
-          dates[itr2] = myDate; 
+          dates[itr2] = myDate;
+          stock_tx_count[itr2] = -stkcnt;
           break;
         }
       }
      
+     // bifurcate realized and unrealized transactions
+     stockTransactions = SeperateRealizedTransactions(symb, txns, dates, stock_tx_count);
+
      // console.log("stock"+symb+"transactions"+txns+"dates"+dates);
       
       stockObj.symbol = symb;
       stocks++;
       stockObj.id = stocks;
       stockObj.stockcount = stkcnt;
-      if (stkcnt > 0) {
-        stockObj.xirr = GetXIRR(symb,txns,dates);
-      }
       
-      if (stkcnt !== 0 && stockObj.xirr !== 0) {
+      // console.log("Stock details" + stockObj.stockname+" "+symb+" "+stocks+" "+stkcnt);
+      
+      if (stkcnt > 0) {
+        stockObj.xirr_overall = GetXIRR(symb,txns,dates);
+      }
+      stockObj.xirr_unrealized = GetXIRR(symb,stockTransactions.txns,stockTransactions.dates);
+      stockObj.xirr_realized = GetXIRR(symb,stockTransactions.r_txns,stockTransactions.r_dates);
+      
+      if (stkcnt !== 0 && stockObj.xirr_overall !== 0) {
         portfolio[itr] = stockObj;
       } else {
         itr--;
       }
     }
     return portfolio;
-
   }
 
   // merge sort implementation
@@ -201,7 +411,7 @@ function   ReadICICIDirectTransactionFile(table) {
       var result = [];
   
       while (left.length && right.length) {
-          if (left[0].xirr >= right[0].xirr) {
+          if (left[0].xirr_unrealized >= right[0].xirr_unrealized) {
               result.push(left.shift());
           } else {
               result.push(right.shift());
@@ -226,75 +436,55 @@ export class FileInput extends React.Component {
   }
   
   stateUpdate() {
-    console.log("state is changing");
+    // console.log("state is changing");
     this.setState({stockavailable: true});
   }
   
   readFile(file1) {
-      if (file1) {
-        
-      console.log(file1.type);
+    
+      const PRICEKEY="bhav";
+      const PORTFOLIOKEY="PortFolio";
+      const MOVIEKEY="movies";
       
-      if(file1.type == 'text/plain') {
-        // alert("TEXT FILE");
-        let reader = new FileReader();
-        reader.onload = function(myFile) { 
-         
-         let contents = myFile.target.result;
-  	     
-         let str = [];
-         for (let i=0,j=0;j<2;j++) {
-             str[j] = contents.substring(i, contents.indexOf(";",i));
-             i += str[j].length + 2;
-          }
-         
-         document.getElementById("demo").innerHTML = str[0] + str[1];
-        
-        };
-        
-        reader.readAsText(file1);
-        
-      } else if (file1.type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+      
+      
+      if (file1) {
+      
+      const FILENAME=file1.name;
+      
+      console.log("Type of file name "+FILENAME+" file type "+file1.type);
+      
+      if (file1.type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+      file1.type == 'application/vnd.ms-excel') {
         // alert("EXCEL FILE");
         
         let reader = new FileReader();
+       
         reader.onload = function(myFile) {
           let data = myFile.target.result;
           let workbook = XLSX.read(data, {type: 'binary'});
           let sheetName = workbook.SheetNames[0];
+          //console.log("Sheet Name "+sheetName);
+          
           let ws = workbook.Sheets[sheetName];
             
           // read XL file into 2-D array
-          let table = XLSX.utils.sheet_to_json(ws, {header:1,raw:true});     
+          let table = XLSX.utils.sheet_to_json(ws, {header:1,raw:true}); 
+          
+          //console.log("Table "+table);
   
-          if (sheetName == "Movies") {
+          if (FILENAME.search(MOVIEKEY) !== -1) {
               for(let itr=0;itr<3;itr++) {
                 /* GetMovieImage(itr,table[itr+1][0]);*/
               }  
-            } else if (sheetName == "Stocks") {
-              for(let itr=0;itr<3;itr++) {
-                let stockCode = "NSE:"+table[itr+1][0];
-                console.log(stockCode);
-               /* GetStockQuotes(itr, stockCode); */
-              }  
-            } else if (sheetName == "Portfolio") {
-                let values=[];
-                let dates=[];
-                for(let itr1 = 0; itr1<table.length; itr1++) {
-                    values[itr1] = table[itr1][0];
-                    dates[itr1] = table[itr1][1];
-                }
-                console.log(values);
-                console.log(dates);
-                let rate = GetXIRR("abc",values,dates);
-                console.log(rate*100 + "%");
-            } else if (sheetName == "Transactions") {
+
+            } else if (FILENAME.search(PORTFOLIOKEY) !== -1) {
   
                 stock = ReadICICIDirectTransactionFile(table);
                 
                 stock = mergeSort(stock);
                 
-                console.log("stock loaded");
+                //console.log("stock loaded");
 
                 /* let StockList = stock.map( element => element.id+", "+element.symbol+","+element.stockcount+","+element.xirr+" | ");
                 document.getElementById("StockList").innerHTML = StockList; */
@@ -316,13 +506,13 @@ export class FileInput extends React.Component {
                   document.getElementById(newtag).innerHTML = (itr+1) + ". " + top3[itr].stockname + " XIRR: " + top3[itr].xirr;
                 }
                 */
-            } else if (sheetName == "BhavCopy") {
+            } else if (FILENAME.search(PRICEKEY) !== -1) {
               
               priceList = table;
-              console.log("price loaded");
+              // console.log("price loaded");
   
             } else {
-              console.log(table);
+              // console.log(table);
               alert("Sheet Name is not Portfolio/Transactions/Stocks/Movies");
             }
   
@@ -395,7 +585,7 @@ export class FileInput extends React.Component {
     */ 
     
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log("yo ho component did update");
+    //console.log("yo ho component did update");
     if(this.timerID !== undefined) { clearInterval(this.timerID); }
   }
 
@@ -409,10 +599,10 @@ export class FileInput extends React.Component {
   render() {
     var a=undefined;
     if (stock === undefined) { 
-      console.log("stocks missing");
+      //console.log("stocks missing");
       a = 0;
     } else {
-      console.log("stocks found");
+     // console.log("stocks found");
       a = stock;
     }
     

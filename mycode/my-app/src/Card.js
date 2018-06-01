@@ -37,11 +37,20 @@ class Label extends React.Component {
 
 class Row extends React.Component {
   render() {
+    let xirrColor1 = undefined;
+    let xirrColor2 = undefined;
+    let xirrColor3 = undefined;
+    xirrColor1 = this.props.stockObj.xirr_overall < 0 ? 'red':'green';
+    xirrColor2 = this.props.stockObj.xirr_realized < 0 ? 'red':'green';
+    xirrColor3 = this.props.stockObj.xirr_unrealized < 0 ? 'red':'green';
+    
     return (
     <li className="rows">
-      <Item item={this.props.stockObj.stockname} width={200} textAlign={'left'}/>
-      <Item item={this.props.stockObj.stockcount} width={100} textAlign={'center'}/>
-      <Item item={this.props.stockObj.xirr} width={100} textAlign={'center'}/>
+      <Item item={this.props.stockObj.stockname} width={200} textAlign={'left'} clr={'black'}/>
+      <Item item={this.props.stockObj.stockcount} width={100} textAlign={'center'} clr={'black'}/>
+      <Item item={this.props.stockObj.xirr_overall} width={100} textAlign={'center'} clr={xirrColor1}/>
+      <Item item={this.props.stockObj.xirr_realized} width={100} textAlign={'center'} clr={xirrColor2}/>
+       <Item item={this.props.stockObj.xirr_unrealized} width={100} textAlign={'center'} clr={xirrColor3}/>
     </li>
     );
   }
@@ -53,7 +62,7 @@ class Item extends React.Component {
     
     var ItemStyle = {
       fontFamily: "sans-serif",
-      fontColor: "red",
+      color: this.props.clr,
       fontSize: 10,
       width: this.props.width,
       padding: 5,
@@ -83,14 +92,16 @@ export class Card extends React.Component {
       listItems = this.props.stock.map((stk) => <Row key={stk.id} stockObj={stk}/>);
     }
     
-    const headerrow = { id: 0,
+    const header_row = { id: 0,
                        symbol: "Stock Symbol",
                        stockname: "Stock Name",
                        stockcount: "Stock Count",
-                       xirr: "XIRR"
+                       xirr_overall: "XIRR Overall",
+                       xirr_realized: "XIRR Realized",
+                       xirr_unrealized: "XIRR Unrealized",
                      };
                      
-    const listItemHeader = <Row key={0} stockObj={headerrow}/>;
+    const listItemHeader = <Row key={0} stockObj={header_row}/>;
     
     return (
     <ol className="cards">{listItemHeader}{listItems}</ol>
