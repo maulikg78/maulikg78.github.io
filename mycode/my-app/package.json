@@ -2,7 +2,7 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "http://maulikg78.github.io/my-app",
+  "homepage": "http://maulikg78.github.io/",
   "dependencies": {
     "gh-pages": "^1.1.0",
     "react": "^16.2.0",

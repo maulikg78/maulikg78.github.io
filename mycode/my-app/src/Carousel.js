@@ -1,6 +1,8 @@
 import React from 'react';
 import './Carousel.css';
 import FileInput from './file-taker';
+import Row from './Row';
+import './Card.css';
 
 const dot="dot";
 const active_dot = "dot active";
@@ -55,7 +57,16 @@ export class Carousel extends React.Component {
       });
     }
 */
-
+    const header_row = { id: 0,
+                       symbol: "Stock Symbol",
+                       stockname: "Stock Name",
+                       stockcount: "Stock Count",
+                       xirr_overall: "XIRR Overall",
+                       xirr_realized: "XIRR Realized",
+                       xirr_unrealized: "XIRR Unrealized",
+                       period: "Period(Yrs)",
+                       absolutereturn: "Absolute Return(%)"
+                     };
              
     return (
     
@@ -64,8 +75,9 @@ export class Carousel extends React.Component {
       
         <div className={slide_class[0]}>
           <div className="text">My Stock Watch</div>
-          <div className="tile-box2">
-             <p id="StockList">StockList</p>
+          <div className="tile-box2 cards">
+             <Row stockObj={header_row}/>
+             <br/>
              <FileInput />
           </div>
         </div>

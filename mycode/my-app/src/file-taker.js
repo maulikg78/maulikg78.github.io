@@ -303,7 +303,9 @@ function   ReadICICIDirectTransactionFile(table) {
                        stockcount: 0,
                        xirr_overall : 0,
                        xirr_realized : 0,
-                       xirr_unrealized : 0
+                       xirr_unrealized : 0,
+                       period: 0,
+                       absolutereturn: 0
                      };
       let stockTransactions = {
                                 txns: [],
@@ -370,7 +372,14 @@ function   ReadICICIDirectTransactionFile(table) {
      stockTransactions = SeperateRealizedTransactions(symb, txns, dates, stock_tx_count);
 
      // console.log("stock"+symb+"transactions"+txns+"dates"+dates);
+     
+      //Get the period for unrealized transactions
+      let lastDateIndex = stockTransactions.dates.length - 1;
+      let period = (stockTransactions.dates[lastDateIndex] - stockTransactions.dates[0])/(1000*60*60*24*365);
+     
+      stockObj.period = precisionRound(period, 2);
       
+     
       stockObj.symbol = symb;
       stocks++;
       stockObj.id = stocks;
@@ -383,6 +392,7 @@ function   ReadICICIDirectTransactionFile(table) {
       }
       stockObj.xirr_unrealized = GetXIRR(symb,stockTransactions.txns,stockTransactions.dates);
       stockObj.xirr_realized = GetXIRR(symb,stockTransactions.r_txns,stockTransactions.r_dates);
+      stockObj.absolutereturn = precisionRound(stockObj.xirr_unrealized*stockObj.period*100,2);
       
       if (stkcnt !== 0 && stockObj.xirr_overall !== 0) {
         portfolio[itr] = stockObj;
