@@ -29,15 +29,16 @@ async function GetTodayBhavCopy() {
  /* try { */
    let url = "https://www.nseindia.com/content/historical/EQUITIES/"
    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-   
+   var months_short = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV","DEC"]
    let today = new Date();
    let year = today.getFullYear();
    let month = months[today.getMonth()].toUpperCase();
+   let month_short = months_short[today.getMonth()];
    let date = today.getDate() - 2;
    let dateString = date.toString(); 
    if (date < 10) { dateString = "0"+dateString }
    
-   let url_next = year+"/"+month+"/cm"+dateString+month+year+"bhav.csv.zip";
+   let url_next = year+"/"+month+"/cm"+dateString+month_short+year+"bhav.csv.zip";
    url += url_next;
    
    var myHeaders = new Headers();

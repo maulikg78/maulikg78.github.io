@@ -1,11 +1,15 @@
 import React from 'react';
 import * as XLSX from 'xlsx';
 import Card from './Card';
+import Row from './Row';
 import './Card.css';
 // import zip from 'jszip';
 
 let stock=undefined;
 let priceList=undefined;
+const PRICEKEY="bhav";
+const PORTFOLIOKEY="PortFolio";
+const MOVIEKEY="movies";
 
 function precisionRound(number, precision) {
     let factor = Math.pow(10, precision);
@@ -440,24 +444,18 @@ function   ReadICICIDirectTransactionFile(table) {
 export class FileInput extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {stockavailable : false};
+    this.state = {fileLoad: 0};
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.stateUpdate = this.stateUpdate.bind(this);
+    this.fileUpload = this.fileUpload.bind(this);
+    this.readFile = this.readFile.bind(this);
   }
   
-  stateUpdate() {
-    // console.log("state is changing");
-    this.setState({stockavailable: true});
+  fileUpload(state) {
+    this.setState({fileLoad: state});
   }
   
-  readFile(file1) {
+  readFile(file1, filetype) {
     
-      const PRICEKEY="bhav";
-      const PORTFOLIOKEY="PortFolio";
-      const MOVIEKEY="movies";
-      
-      
-      
       if (file1) {
       
       const FILENAME=file1.name;
@@ -483,16 +481,20 @@ export class FileInput extends React.Component {
           
           //console.log("Table "+table);
   
-          if (FILENAME.search(MOVIEKEY) !== -1) {
+          if (filetype === 3) {
               for(let itr=0;itr<3;itr++) {
                 /* GetMovieImage(itr,table[itr+1][0]);*/
               }  
 
-            } else if (FILENAME.search(PORTFOLIOKEY) !== -1) {
+            } else if (filetype === 2) {
   
                 stock = ReadICICIDirectTransactionFile(table);
                 
                 stock = mergeSort(stock);
+                
+                //console.log(stock);
+                
+                //this.fileUpload(2);
                 
                 //console.log("stock loaded");
 
@@ -516,7 +518,7 @@ export class FileInput extends React.Component {
                   document.getElementById(newtag).innerHTML = (itr+1) + ". " + top3[itr].stockname + " XIRR: " + top3[itr].xirr;
                 }
                 */
-            } else if (FILENAME.search(PRICEKEY) !== -1) {
+            } else if (filetype === 1) {
               
               priceList = table;
               // console.log("price loaded");
@@ -584,6 +586,7 @@ export class FileInput extends React.Component {
     } else { 
         alert("Invalid file");
     }
+    
   }
   /*
   readSingleFile(filelist1) {
@@ -593,34 +596,69 @@ export class FileInput extends React.Component {
     readFile(file1);
   }
     */ 
-    
+
+
   componentDidUpdate(prevProps, prevState, snapshot) {
-    //console.log("yo ho component did update");
     if(this.timerID !== undefined) { clearInterval(this.timerID); }
   }
 
+
   handleSubmit(event) {
     event.preventDefault();
-    this.readFile(this.fileInput.files[0]);
-    if(this.timerID !== undefined) { clearInterval(this.timerID); }
-    this.timerID = setInterval(() => this.stateUpdate(), 5000);
-   }
-
+    let file1 = this.fileInput.files[0];
+    let FILENAME = file1.name;
+    if (FILENAME.search(PRICEKEY) !== -1) {
+       this.fileUpload(1);
+       this.readFile(file1,1);
+    } else if (FILENAME.search(PORTFOLIOKEY) !== -1) {
+       if(this.state.fileLoad >= 1 && this.state.fileLoad < 10) {
+         this.readFile(file1,2);
+         this.timerID = setInterval(() => {this.fileUpload(this.state.fileLoad + 1); }, 1000); 
+       }
+       else {
+         alert("Load Price File first!!");
+       }
+    } else if (FILENAME.search(MOVIEKEY) !== -1) {
+        // needed to be managed differently!! 
+        this.fileUpload(10);
+        this.readFile(file1,3);
+    }
+  }
+  
   render() {
-    var a=undefined;
-    if (stock === undefined) { 
-      //console.log("stocks missing");
-      a = 0;
+    
+  const header_row = { id: 0,
+                       symbol: "Stock Symbol",
+                       stockname: "Stock Name",
+                       stockcount: "Stock Count",
+                       xirr_overall: "XIRR Overall",
+                       xirr_realized: "XIRR Realized",
+                       xirr_unrealized: "XIRR Unrealized",
+                       period: "Period(Yrs)",
+                       absolutereturn: "Absolute Return(%)"
+                     };
+    let a = (stock===undefined)?0:stock;
+    let b = this.state.fileLoad;
+    let msg = "Upload File"; 
+    
+    if (b === 0) {
+      msg = "Upload Yesterday's Price ";
+    } else if (b === 1) {
+      msg = "Price file loaded. Upload your Portfolio ";
+    } else if (b > 1 && b < 10) {
+      msg = "Portfolio file "+b+" Loaded. Upload another Portfolio? ";
     } else {
-     // console.log("stocks found");
-      a = stock;
+      console.log(b);
+      msg = "Error";
     }
     
     return (
-      <div className="cardcontainerstyle">
-        <form onSubmit={this.handleSubmit}>
+      <div>
+        <form className="fileinputstyle" onSubmit={this.handleSubmit}>
           <label>
-            Upload file:
+            {msg}
+            <br/>
+            <br/>
             <input
               type="file"
               ref={input => {
@@ -628,10 +666,15 @@ export class FileInput extends React.Component {
               }}
             />
           </label>
-          <br />
           <button type="submit">Submit</button>
         </form>
-        <Card color="#FF6663" stock={a}/>
+          <ol className="cards">
+            <Row stockObj={header_row}/>
+          </ol>
+          <br/>
+        <div className="cardcontainerstyle">
+          <Card color="#FF6663" stock={a}/>
+        </div>
       </div>
     )
   }

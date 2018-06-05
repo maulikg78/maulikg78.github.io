@@ -21,6 +21,14 @@
 }
 
 .cardcontainerstyle {
-  height: 70vh;
-  overflow-y: scroll;
+  height: 60vh;
+  width: 90vw;
+  overflow-y: auto;
+}
+
+.fileinputstyle {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 15px;
+  background: lightgrey;
 }
