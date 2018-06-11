@@ -8,26 +8,16 @@ import registerServiceWorker from './registerServiceWorker';
 import * as XLSX from 'xlsx';
 import zip from 'jszip';
 
-// let stock=undefined;
-// let priceList=undefined;
-
-//ReactDOM.render(<App />, document.getElementById('root'));
 ReactDOM.render(<Carousel />, document.getElementById('carouselactions'));
 registerServiceWorker();
 GetTodayBhavCopy();
 
 
-const api_key='e16685610255dd6967f3421eef7ea3bc';
-const url_start = 'https://api.themoviedb.org/3/find/';
-const url_end = '?api_key=' + api_key + '&language=en-US&external_source=imdb_id';
-const url2 = 'http://image.tmdb.org/t/p/original';
-const imdb_ref = 'http://www.imdb.com/title/';
 
-var posterpath = "";
 
 async function GetTodayBhavCopy() {
  /* try { */
-   let url = "https://www.nseindia.com/content/historical/EQUITIES/"
+   let url = "https://nseindia.com/content/historical/EQUITIES/"
    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
    var months_short = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV","DEC"]
    let today = new Date();
@@ -38,7 +28,7 @@ async function GetTodayBhavCopy() {
    let dateString = date.toString(); 
    if (date < 10) { dateString = "0"+dateString }
    
-   let url_next = year+"/"+month+"/cm"+dateString+month_short+year+"bhav.csv.zip";
+   let url_next = year+"/"+month_short+"/cm"+dateString+month_short+year+"bhav.csv.zip";
    url += url_next;
    
    var myHeaders = new Headers();
@@ -63,30 +53,6 @@ async function GetTodayBhavCopy() {
   */
 }
 
-
-async function GetMovieImage(id, movie_key) {
-  try {
-   let url = url_start + movie_key + url_end;
-   console.log(url);
-   let response = await fetch(url);
-   
-   if(response.ok) {
-     let jsonResponse = await response.json();
-     let imageMap = "myImage" + id;
-     let imageLink = "imageLink" + id;
-     console.log(imageMap);
-     posterpath = await jsonResponse.movie_results[0].poster_path;
-     let url3 = url2 + posterpath;
-     console.log(url3);
-     document.getElementById(imageMap).src = url3;
-     document.getElementById(imageLink).href = imdb_ref + movie_key;
-     return jsonResponse;
-   }
-   throw new Error('Request failed');
-  } catch(error) {
-    console.log(error);
-  }
-}
 
 
 function GetDate_YYYYMMDD_withDash2(myDate) {

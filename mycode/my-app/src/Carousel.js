@@ -47,54 +47,30 @@ export class Carousel extends React.Component {
   
 
   render() {
-/*
-    let elements = undefined; 
-    if (this.props.stk == undefined) {
-      elements = <li>StockList</li>;
-    } else {
-      elements = this.props.stk.map((element) => {
-              return (<li key={element.id}>{element.stockname}</li>);
-      });
-    }
-*/
-
-             
+    
     return (
     
     <div>  
-      <div className="slideshow-container tile-wrapper">
+      <div className="slideshow-container">
       
         <div className={slide_class[0]}>
           <div className="text">My Stock Watch</div>
           <div className="tile-box2 cards">
-             <FileInput />
+             <FileInput type="stock"/>
           </div>
         </div>
       
         <div className={slide_class[1]}>
-          <div className="text text-color">My Route</div>
-          <div className="tile-box2">
-            <iframe id="maps" className ="noborder" src="https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d482676.05143371545!2d72.74198573346584!3d19.067841431681888!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e0!4m5!1s0x3be7c3a9e4ecbad3%3A0x9fb938081011325f!2sNeelsidhi+Splendour%2C+Sector+15%2C+CBD+Belapur%2C+Navi+Mumbai%2C+Maharashtra+400614%2C+India!3m2!1d19.0086759!2d73.03476739999999!4m5!1s0x3be7c0beddab5c77%3A0xd2f7874862ef69dd!2sReliance+Corporate+Park%2C+MIDC%2C+Ghansoli%2C+Navi+Mumbai%2C+Maharashtra+400701%2C+India!3m2!1d19.1275105!2d73.0076079!5e0!3m2!1sen!2sin!4v1515140868072" frameBorder="0" allowFullScreen></iframe>
-            <div className="Notes">
-               <p> From Home to Office using Google maps </p>
-            </div>
+          <div className="text">My Route</div>
+          <div className="tile-box2 cards">
+            <p> From Home to Office using Google maps </p>
+            <iframe id="maps" className ="maps" src="https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d482676.05143371545!2d72.74198573346584!3d19.067841431681888!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e0!4m5!1s0x3be7c3a9e4ecbad3%3A0x9fb938081011325f!2sNeelsidhi+Splendour%2C+Sector+15%2C+CBD+Belapur%2C+Navi+Mumbai%2C+Maharashtra+400614%2C+India!3m2!1d19.0086759!2d73.03476739999999!4m5!1s0x3be7c0beddab5c77%3A0xd2f7874862ef69dd!2sReliance+Corporate+Park%2C+MIDC%2C+Ghansoli%2C+Navi+Mumbai%2C+Maharashtra+400701%2C+India!3m2!1d19.1275105!2d73.0076079!5e0!3m2!1sen!2sin!4v1515140868072" frameBorder="0" allowFullScreen></iframe>
           </div>
         </div>
         
         <div className={slide_class[2]}>
           <div className="text">My Fav Movies</div>
-          <div className="tile-box2 scroll-box">
-              <a id="imageLink0">
-                <img id="myImage0" src="../images/kitten.jpg" alt="Movie" className="noborder" frameBorder="0" allowFullScreen />
-              </a>
-              <a id="imageLink1">
-                <img id="myImage1" src="../images/kitten.jpg" alt="Movie" className="noborder" frameBorder="0" allowFullScreen />
-              </a>
-              <a id="imageLink2">
-                <img id="myImage2" src="../images/kitten.jpg" alt="Movie" className="noborder" frameBorder="0" allowFullScreen />
-              </a>
-              <FileInput />
-          </div>
+          <FileInput type="movie"/>
         </div>
         
          <div className={slide_class[3]}>
@@ -124,10 +100,19 @@ export class Carousel extends React.Component {
         </div> 
       </div>
       
-      </div>
+    </div>
     );
   }
 }
 
 export default Carousel;
 
+              // <a id="imageLink0">
+              //   <img id="myImage0" src="../images/kitten.jpg" alt="Movie" className="noborder" frameBorder="0" allowFullScreen />
+              // </a>
+              // <a id="imageLink1">
+              //   <img id="myImage1" src="../images/kitten.jpg" alt="Movie" className="noborder" frameBorder="0" allowFullScreen />
+              // </a>
+              // <a id="imageLink2">
+              //   <img id="myImage2" src="../images/kitten.jpg" alt="Movie" className="noborder" frameBorder="0" allowFullScreen />
+              // </a>
