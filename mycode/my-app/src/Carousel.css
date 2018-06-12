@@ -172,3 +172,12 @@
 /*  width: 20vw;*/
 /*  height: 40vh;*/
 /*}*/
+
+.urlstyle {
+  font-style: underline;
+  color: blue;
+}
+
+.urlstyle_hide {
+  display: none;
+}

@@ -1,10 +1,11 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import * as XLSX from 'xlsx';
 import Card from './Card';
 import Row from './Row';
 import './Card.css';
 import './Carousel.css';
-// import zip from 'jszip';
+import {JSZip} from 'jszip';
 
 let stock=undefined;
 let priceList=undefined;
@@ -12,6 +13,80 @@ let movie_images=[];
 const PRICEKEY="bhav";
 const PORTFOLIOKEY="PortFolio";
 const MOVIEKEY="Ratings";
+
+function GetTodayBhavCopy() {
+ // try { 
+   let url = "https://nseindia.com/content/historical/EQUITIES/";
+   var months_short = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV","DEC"];
+   let today = new Date();
+   let year = today.getFullYear();
+   let day = today.getDay();
+   let month_short = months_short[today.getMonth()];
+   let date = undefined;
+   let time = today.getHours();
+   
+   // manage for sat, sunday and monday's to get the bhav copy before 6pm
+   if (day === 0) {
+     date = -2;
+   } else if (day === 1) {
+     date = -3;
+   } else {
+     date = -1;     
+   }
+   
+   // after 6pm bhav copy for today should be available
+   if (time > 18) {
+     date = 0;
+   }
+   
+   date += today.getDate();
+   
+   let dateString = date.toString(); 
+   if (date < 10) { dateString = "0"+dateString }
+   
+   let url_next = year+"/"+month_short+"/cm"+dateString+month_short+year+"bhav.csv.zip";
+   url += url_next;
+   
+    //"use strict";
+/*
+    var request = require('request');
+
+    request({
+      method : "GET",
+      url : url,
+      gzip : true,
+      encoding: null // <- this one is important !
+    }, function (error, response, body) {
+      console.log("response code : "+response);
+      if(error) {
+        console.log("Oh God!! An Error!! : "+error);
+        return;
+      }
+      JSZip.loadAsync(body).then(function (zip) {
+        console.log("made it");
+        return zip.file("content.txt").async("string");
+      }).then(function (text) {
+        console.log(text);
+      });
+    });
+   */
+   
+   //console.log("URL ="+url);
+   /*
+   let response = await fetch(url);
+   
+   if(response.ok) {
+     console.log("Price Fetched");
+     let jsonResponse = await response.json();
+     return jsonResponse;
+   }
+   throw new Error('Request failed');
+  } catch(error) {
+    console.log(error);
+  } 
+  */
+  return url;
+}
 
 async function GetMovieImage(id, movie_key) {
     
@@ -574,7 +649,7 @@ export class FileInput extends React.Component {
               console.log(movie_images);
 
             } else if (filetype === 2) {
-  
+               
                 stock = ReadICICIDirectTransactionFile(table);
                 
                 stock = mergeSort(stock);
@@ -666,10 +741,38 @@ export class FileInput extends React.Component {
           };
     
         reader.readAsBinaryString(file1);
+      
+        
+      } else if (file1.type === "application/x-zip-compressed") {
+        
+        // reading a zip file --- Yaaay!! 
+        //console.log("Zip file submitted");
+          
+        let zipper = require("jszip");
+        
+        zipper.loadAsync(file1).then(function(zip) {
+          
+          zip.forEach(function (relativePath, zipEntry) {  // 2) print entries
+             //console.log("zipEntry : "+zipEntry.name);
+             // Read the contents of the 'Hello.txt' file
+             zip.file(zipEntry.name).async("binarystring").then(function (data) {
+             // data is "Hello World!"
+             //console.log(data);
+             let workbook = XLSX.read(data, {type: 'binary'});
+             let sheetName = workbook.SheetNames[0];
+             let ws = workbook.Sheets[sheetName];
+    
+             // read XL file into 2-D array
+             priceList = XLSX.utils.sheet_to_json(ws, {header:1,raw:true}); 
+             //console.log(priceList);
+            });
+          });
+          
+        }, function() {alert("Not a valid zip file")}); 
+      } else {
+        alert("invalid file type : neither excel nor zip");
       }
-      else {
-        alert("Not an Excel File");
-      }
+   
     } else { 
         alert("Invalid file");
     }
@@ -692,6 +795,7 @@ export class FileInput extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
+    
     let file1 = this.fileInput.files[0];
     let FILENAME = file1.name;
     if (FILENAME.search(PRICEKEY) !== -1) {
@@ -732,16 +836,22 @@ export class FileInput extends React.Component {
     let a = (stock===undefined)?0:stock;
     let b = this.state.fileLoad;
     let msg = "Upload Movie Ratings File"; 
-  
+    let nse_feed_url = "";
+    let showlinkClass = "urlstyle_hide";
+
     
     let cards_stack = <br/>;
     if (this.props.type === "stock") {
       if (b === 0) {
-        msg = "Upload Yesterday's Price ";
+        nse_feed_url = GetTodayBhavCopy();
+        msg = "Upload Price List. Get Latest Price List ";
+        showlinkClass = "urlstyle";
       } else if (b === 1) {
         msg = "Price file loaded. Upload your Portfolio ";
+        showlinkClass = "urlstyle_hide";
       } else if (b > 1 && b < 10) {
         msg = "Portfolio file "+b+" Loaded. Do you want to upload another Portfolio? ";
+        showlinkClass = "urlstyle_hide";
       } else {
         console.log(b);
         msg = "Error";
@@ -772,6 +882,9 @@ export class FileInput extends React.Component {
         <form className="fileinputstyle" onSubmit={this.handleSubmit}>
           <label>
             {msg}
+            <a className={showlinkClass} href={nse_feed_url}>
+              here
+            </a>
             <br/>
             <br/>
             <input

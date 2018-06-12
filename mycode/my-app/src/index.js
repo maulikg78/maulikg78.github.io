@@ -10,49 +10,6 @@ import zip from 'jszip';
 
 ReactDOM.render(<Carousel />, document.getElementById('carouselactions'));
 registerServiceWorker();
-GetTodayBhavCopy();
-
-
-
-
-async function GetTodayBhavCopy() {
- /* try { */
-   let url = "https://nseindia.com/content/historical/EQUITIES/"
-   var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-   var months_short = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV","DEC"]
-   let today = new Date();
-   let year = today.getFullYear();
-   let month = months[today.getMonth()].toUpperCase();
-   let month_short = months_short[today.getMonth()];
-   let date = today.getDate() - 2;
-   let dateString = date.toString(); 
-   if (date < 10) { dateString = "0"+dateString }
-   
-   let url_next = year+"/"+month_short+"/cm"+dateString+month_short+year+"bhav.csv.zip";
-   url += url_next;
-   
-   var myHeaders = new Headers();
-   var myInit = { method: 'GET',
-               headers: myHeaders,
-               mode: 'no-cors',
-               cache: 'default' };
-   
-   console.log("URL ="+url);
-   
-   /*
-   let response = await fetch(url, myInit);
-   
-   if(response.ok) {
-     let jsonResponse = await response.json();
-     return jsonResponse;
-   }
-   throw new Error('Request failed');
-  } catch(error) {
-    console.log(error);
-  } 
-  */
-}
-
 
 
 function GetDate_YYYYMMDD_withDash2(myDate) {
