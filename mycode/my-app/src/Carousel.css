@@ -181,3 +181,10 @@
 .urlstyle_hide {
   display: none;
 }
+
+.showSaveStyle {
+  margin-top: 5px;
+}
+.showSaveStyle_hide {
+  display: none;
+}

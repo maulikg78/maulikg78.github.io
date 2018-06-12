@@ -606,6 +606,34 @@ function   ReadICICIDirectTransactionFile(table) {
       return result;
   }
   
+class Save extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleSave = this.handleSave.bind(this);
+  }
+  
+  handleSave(event) {
+    console.log("Saving the file");
+    event.preventDefault();
+    
+    /* make the worksheet */
+    var ws = XLSX.utils.json_to_sheet(this.props.portfolio);
+  
+    /* add to workbook */
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "XIRR");
+  
+    /* generate an XLSX file */
+    XLSX.writeFile(wb, "myPortfolio.xlsx");
+  }
+
+  render() {
+    return (<form onSubmit={this.handleSave}>
+              <button type="submit">Save</button>
+            </form>);
+  }
+}
+
 export class FileInput extends React.Component {
   constructor(props) {
     super(props);
@@ -833,7 +861,13 @@ export class FileInput extends React.Component {
                        xirr_overall: "XIRR Overall(%)",
                        xirr_realized: "XIRR Realized(%)"
                      };
+    
     let a = (stock===undefined)?0:stock;
+    let showSaveStyle="showSaveStyle_hide";
+    if (a !== 0 && this.state.fileLoad !== 10) {
+      showSaveStyle="showSaveStyle";
+    }
+    
     let b = this.state.fileLoad;
     let msg = "Upload Movie Ratings File"; 
     let nse_feed_url = "";
@@ -897,9 +931,14 @@ export class FileInput extends React.Component {
           <button type="submit">Submit</button>
         </form>
         {cards_stack}
+        <div className={showSaveStyle}>
+          <Save portfolio={a}/>
+        </div>
       </div>
     )
   }
 }
+
+
 
 export default FileInput;
