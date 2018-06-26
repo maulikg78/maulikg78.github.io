@@ -51,7 +51,7 @@ export class Card extends React.Component {
     };
     */
     
-    var listItems = <li>Please load your Portfolio to see XIRR...</li>;
+    var listItems = <li className="rows rows_default_height">Please load your Portfolio to see XIRR...</li>;
     
     if (this.props.stock !== 0) {
       listItems = this.props.stock.map((stk) => <Row key={stk.id} stockObj={stk}/>);

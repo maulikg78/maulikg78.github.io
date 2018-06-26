@@ -9,6 +9,7 @@ import {JSZip} from 'jszip';
 
 let stock=undefined;
 let priceList=undefined;
+let overallPortfolio = undefined;
 let movie_images=[];
 const PRICEKEY="bhav";
 const PORTFOLIOKEY="PortFolio";
@@ -40,7 +41,7 @@ function GetTodayBhavCopy() {
    }
    
    date += today.getDate();
-   
+
    let dateString = date.toString(); 
    if (date < 10) { dateString = "0"+dateString }
    
@@ -105,7 +106,6 @@ async function GetMovieImage(id, movie_key) {
 
   try {
    let url = url_start + movie_key + url_end;
-   console.log(url);
    let response = await fetch(url);
    
    if(response.ok) {
@@ -163,29 +163,29 @@ function GetXIRR(symbol, values, dates) {
     console.log("check XIRR"+values+"\n"+ dates);
   }
   */
-  
-  for (; itr < (10/increment); itr++) {
-    let npv = GetNPV(symbol, values, dates, rate);
-    /* debug
-    if (symbol === "INE412U01017") {
-      console.log("npv : "+npv+"rate : "+rate);
-    }
-    */
-    prepreviousnpv = previousnpv;
-    previousnpv = precisenpv;
-    precisenpv = precisionRound(npv, precision);
-    if (precisenpv === 0) { 
-      break; 
-    } else if (precisenpv < 0 ) {
-      rate -= increment;
-    } else if (precisenpv > 0) {
-      rate += increment; 
-    }
-    if (precisenpv === prepreviousnpv) {
-      break;
+  if (values.length !== 0 && values.length === dates.length) {
+    for (; itr < (10/increment); itr++) {
+      let npv = GetNPV(symbol, values, dates, rate);
+      /* debug
+      if (symbol === "INE412U01017") {
+        console.log("npv : "+npv+"rate : "+rate);
+      }
+      */
+      prepreviousnpv = previousnpv;
+      previousnpv = precisenpv;
+      precisenpv = precisionRound(npv, precision);
+      if (precisenpv === 0) { 
+        break; 
+      } else if (precisenpv < 0 ) {
+        rate -= increment;
+      } else if (precisenpv > 0) {
+        rate += increment; 
+      }
+      if (precisenpv === prepreviousnpv) {
+        break;
+      }
     }
   }
-  
   return precisionRound(rate*100, precision);
 }
 
@@ -401,7 +401,7 @@ function   ReadICICIDirectTransactionFile(table) {
     let index = 1;
     let portfolio = [];
     let myDate = new Date();
-    let stocks = 0;
+    let stockID = 0;
     //table reader
     const STKSYMB=2;
     const STKNAME=1;
@@ -410,11 +410,24 @@ function   ReadICICIDirectTransactionFile(table) {
     const STKQTY=4;
     const STKPRICE=15;
     let stockYestPrice = undefined;
+    let pT = {
+               txns: [],
+               dates: [], 
+               ur_txns : [],
+               ur_dates : [],
+               ur_stkcnt : [],
+               r_txns : [],
+               r_dates : [],
+               r_stkcnt : []
+              };
+    let ptitrol = 0;
+    let ptitrur = 0;
+    let ptitrr = 0;
     
     for(let itr=0;index<table.length;index++, itr++) {
      
       let symb = table[index][STKSYMB];
-      let date_store = undefined;
+ //     let date_store = undefined;
       let stock_tx_count = [];
       let txns = [];
       let dates = [];
@@ -424,6 +437,7 @@ function   ReadICICIDirectTransactionFile(table) {
                        symbol: "Adani",
                        stockname: "Adani Ports",
                        stockcount: 0,
+                       avgcostprice : 0,
                        currentmarketprice : 0,
                        unrealizedprofit : 0,
                        xirr_unrealized : 0,
@@ -432,14 +446,8 @@ function   ReadICICIDirectTransactionFile(table) {
                        xirr_overall : 0,
                        xirr_realized : 0
                      };
-      let stockTransactions = {
-                                txns: [],
-                                dates: [],
-                                stkcnt: [],
-                                txns2: [],
-                                dates2: [],
-                                stkcnt2: []
-                              };
+      let stockTransactions = undefined;
+
 
       // PENDING : merge transactions if on same date and same type of tx
       // PENDING : create a stock tx object and use that instead of seprate arrays
@@ -456,17 +464,18 @@ function   ReadICICIDirectTransactionFile(table) {
         if (symb === table[index][STKSYMB]) {
           
           // combine transactions done on same date
+          /* -- not combining tx 
           if (date_store !== undefined && itr2 !== 0 && date_store === new_date) {
             itr2--;
             txns[itr2] += tx_value;
             stock_tx_count[itr2] += tx_stk_count;
-//            console.log("stockname :"+stockObj.stockname+" merging tx");
           } else {
+          */
             txns[itr2] = tx_value;
             dates[itr2] = TranslateExcelDate(new_date);
             stock_tx_count[itr2] = tx_stk_count;
-            date_store = new_date;
-          }
+        //  date_store = new_date;
+         // }
           
           // count the available stocks of a particular company
           stkcnt += tx_stk_count;
@@ -513,8 +522,25 @@ function   ReadICICIDirectTransactionFile(table) {
         }
       }
      
+     
      // bifurcate realized and unrealized transactions
      stockTransactions = SeperateRealizedTransactions(symb, txns, dates, stock_tx_count);
+
+     // copy all portfolio transaction values
+     for(let i=0;i<stock_tx_count.length;ptitrol++,i++) {
+       pT.txns[ptitrol] = txns[i];
+       pT.dates[ptitrol] = dates[i];
+     }
+     for(let i=0;i<stockTransactions.stkcnt.length;i++,ptitrur++) {
+       pT.ur_txns[ptitrur] = stockTransactions.txns[i];
+       pT.ur_dates[ptitrur] = stockTransactions.dates[i];
+       pT.ur_stkcnt[ptitrur] = stockTransactions.stkcnt[i];
+     }
+     for(let i=0;i<stockTransactions.r_stkcnt.length;i++,ptitrr++) {
+       pT.r_txns[ptitrr] = stockTransactions.r_txns[i];
+       pT.r_dates[ptitrr] = stockTransactions.r_dates[i];
+       pT.r_stkcnt[ptitrr] = stockTransactions.r_stkcnt[i];
+     }
 
 /*
      if (symb === "INE528G01027") {
@@ -523,53 +549,114 @@ function   ReadICICIDirectTransactionFile(table) {
        console.log("Realized stockTransactions : "+stockTransactions.r_txns+stockTransactions.r_dates+stockTransactions.r_stkcnt);
      }
 */
-     
-      //Get the period for unrealized transactions
-      let lastDateIndex = stockTransactions.dates.length - 1;
-      let period = (stockTransactions.dates[lastDateIndex] - stockTransactions.dates[0])/(1000*60*60*24*365);
-     
-      stockObj.period = precisionRound(period, 2);
-      
-     
+
       stockObj.symbol = symb;
-      stocks++;
-      stockObj.id = stocks;
+      stockID++;
+      stockObj.id = stockID;
       stockObj.stockcount = stkcnt;
-
-      let stock_cost = 0;
-      for(let i=0; i< stockTransactions.stkcnt.length - 1; i++) {
-        stock_cost += stockTransactions.txns[i];
+      stockObj.xirr_overall = GetXIRR(symb,txns,dates);
+      
+      //Get the period for unrealized transactions
+      let stock_cost=0;
+      if (stockTransactions.dates.length !== 0) {
+        let lastDateIndex = stockTransactions.dates.length - 1;
+        stockObj.period = precisionRound((stockTransactions.dates[lastDateIndex] - stockTransactions.dates[0])/(1000*60*60*24*365), 2);
+        for(let i=0; i< stockTransactions.stkcnt.length - 1; i++) {
+          stock_cost += stockTransactions.txns[i];
+        }
+        if (stkcnt !== 0) {
+          stockObj.avgcostprice = precisionRound(-stock_cost/stkcnt,2);
+        } 
+      } 
+      
+      let profit = (stockYestPrice*stkcnt) + stock_cost
+      stockObj.unrealizedprofit = precisionRound(profit, 0);
+      
+      if (stock_cost !== 0 && stkcnt !== 0) {
+        stockObj.absolutereturn = precisionRound((stockObj.unrealizedprofit*100/ (-stock_cost)),2);
+        stockObj.xirr_unrealized = GetXIRR(symb,stockTransactions.txns,stockTransactions.dates);     
+      } else if (stkcnt !== 0) {
+        stockObj.absolutereturn = "1000";
+        stockObj.xirr_unrealized = "1000";
       }
+ 
+      stockObj.currentmarketprice = stockYestPrice;
       
-      // console.log(stockObj.stockname+" : "+stock_cost);
-      
-      let profit = (stockYestPrice*stkcnt) + stock_cost;
-      // console.log("Stock details" + stockObj.stockname+" "+symb+" "+stocks+" "+stkcnt);
-      
-      if (stkcnt > 0) {
-        stockObj.xirr_overall = GetXIRR(symb,txns,dates);
-        stockObj.currentmarketprice = stockYestPrice;
-        stockObj.unrealizedprofit = precisionRound(profit, 0);
-        stockObj.absolutereturn = precisionRound((profit*100/ (-stock_cost)),2);
+      if (stkcnt === 0) {
+        stockObj.xirr_realized = stockObj.xirr_overall;
+      } else if (stockTransactions.r_stkcnt.length !== 0) {
+        stockObj.xirr_realized = GetXIRR(symb,stockTransactions.r_txns,stockTransactions.r_dates);
+      } else {
+        // if realized xirr = 0 then unrealized xirr = overall xirr
       }
-      
-
-      stockObj.xirr_unrealized = GetXIRR(symb,stockTransactions.txns,stockTransactions.dates);
-      stockObj.xirr_realized = GetXIRR(symb,stockTransactions.r_txns,stockTransactions.r_dates);
-
       
       /*
       if (symb === 'INE018I01017') {
         console.log(stockObj);
       }
       */ 
+      
+      /*
       if (stkcnt !== 0 && stockObj.xirr_overall !== 0 && stockObj.xirr_unrealized !== 1000) {
         portfolio[itr] = stockObj;
       } else {
         itr--;
-      }
+      } */
+      
+      portfolio[itr] = stockObj;
     }
+    overallPortfolio = pT;
+    
     return portfolio;
+  }
+  
+  function AddPortfolioXIRR(portfolio) {
+    let symb = "OVERALL";
+    let stockObj = { 
+                 id: 1000,
+                 symbol: symb,
+                 stockname: symb,
+                 stockcount: "-",
+                 avgcostprice: "-",
+                 currentmarketprice : "-",
+                 unrealizedprofit : 0,
+                 xirr_unrealized : 0,
+                 period: "-",
+                 absolutereturn: 0,
+                 xirr_overall : 0,
+                 xirr_realized : 0
+               };
+               
+       
+      //Get the period for unrealized transactions
+      /* incorrect logic as the transactions are not sorted
+      let lastDateIndex = overallPortfolio.ur_dates.length - 1;
+      let period = (overallPortfolio.ur_dates[lastDateIndex] - overallPortfolio.ur_dates[0])/(1000*60*60*24*365);
+      console.log(overallPortfolio.ur_dates);
+      stockObj.period = precisionRound(period, 2);
+      */
+
+      let stock_cost = 0;
+      for(let i=0; i< overallPortfolio.ur_stkcnt.length; i++) {
+        stock_cost += (overallPortfolio.ur_txns[i]>=0?0:overallPortfolio.ur_txns[i]);
+      }
+      
+      let profit = 0;
+      for(let i=0; i < portfolio.length; i++) {
+        profit += portfolio[i].unrealizedprofit;
+      }
+      
+      stockObj.xirr_overall = GetXIRR(symb,overallPortfolio.txns,overallPortfolio.dates);
+      stockObj.unrealizedprofit = precisionRound(profit, 0);
+      stockObj.absolutereturn = precisionRound((profit*100/ (-stock_cost)),2);
+
+
+      stockObj.xirr_unrealized = GetXIRR(symb,overallPortfolio.ur_txns,overallPortfolio.ur_dates);
+      stockObj.xirr_realized = GetXIRR(symb,overallPortfolio.r_txns,overallPortfolio.r_dates);
+
+      portfolio.unshift(stockObj);
+
+      return portfolio;
   }
 
   // merge sort implementation
@@ -652,7 +739,7 @@ export class FileInput extends React.Component {
       if (file1) {
       
       if (file1.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
-      file1.type === 'application/vnd.ms-excel') {
+      file1.type === 'application/vnd.ms-excel' || file1.type === 'text/comma-separated-values') {
         // alert("EXCEL FILE");
         
         let reader = new FileReader();
@@ -681,6 +768,10 @@ export class FileInput extends React.Component {
                 stock = ReadICICIDirectTransactionFile(table);
                 
                 stock = mergeSort(stock);
+                
+                stock = AddPortfolioXIRR(stock);
+                
+                //console.log(stock);
                 
                 // console.log(stock);
                 
@@ -771,7 +862,7 @@ export class FileInput extends React.Component {
         reader.readAsBinaryString(file1);
       
         
-      } else if (file1.type === "application/x-zip-compressed") {
+      } else if (file1.type === "application/x-zip-compressed" || file1.type === "application/zip") {
         
         // reading a zip file --- Yaaay!! 
         //console.log("Zip file submitted");
@@ -798,7 +889,7 @@ export class FileInput extends React.Component {
           
         }, function() {alert("Not a valid zip file")}); 
       } else {
-        alert("invalid file type : neither excel nor zip");
+        alert("invalid file type : neither excel nor zip : "+file1.type);
       }
    
     } else { 
@@ -852,11 +943,12 @@ export class FileInput extends React.Component {
   const header_row = { id: 0,
                        symbol: "Stock Symbol",
                        stockname: "Stock Name",
-                       stockcount: "Stock Count",
+                       stockcount: "Qty",
+                       avgcostprice: "Avg Cost Price",
                        currentmarketprice: "Current Mkt Price",
                        unrealizedprofit: "Unrealized Profit",
-                       xirr_unrealized: "XIRR (%)",
-                       period: "Period(Yrs)",
+                       xirr_unrealized: "XIRR(%)",
+                       period: "Holding Period(Yrs)",
                        absolutereturn: "Absolute Return(%)",
                        xirr_overall: "XIRR Overall(%)",
                        xirr_realized: "XIRR Realized(%)"
@@ -891,12 +983,12 @@ export class FileInput extends React.Component {
         msg = "Error";
       }
       cards_stack = <div>
+                      <br/>
                       <ol className="cards">
                         <Row stockObj={header_row}/>
                       </ol>
-                      <br/>
                       <div className="cardcontainerstyle">
-                        <Card color="#FF6663" stock={a}/>
+                        <Card stock={a}/>
                       </div>
                     </div>;
     } else if (this.props.type === "movie" && this.state.fileLoad === 10) {

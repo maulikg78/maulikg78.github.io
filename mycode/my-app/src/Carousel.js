@@ -55,7 +55,7 @@ export class Carousel extends React.Component {
       
         <div className={slide_class[0]}>
           <div className="text">My Stock Watch</div>
-          <div className="tile-box2 cards">
+          <div className="tile-box2">
              <FileInput type="stock"/>
           </div>
         </div>
