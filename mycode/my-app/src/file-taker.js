@@ -10,6 +10,7 @@ import {JSZip} from 'jszip';
 let stock=undefined;
 let priceList=undefined;
 let overallPortfolio = undefined;
+let stocktxtable=undefined;
 let movie_images=[];
 const PRICEKEY="bhav";
 const PORTFOLIOKEY="PortFolio";
@@ -36,7 +37,7 @@ function GetTodayBhavCopy() {
    }
    
    // after 6pm bhav copy for today should be available
-   if (time > 18) {
+   if (time > 17) {
      date = 0;
    }
    
@@ -269,6 +270,7 @@ function SeperateRealizedTransactions(symb, txns, dates, stk_tx_cnt) {
                         r_stkcnt: []
                       };
   
+//  if (symb === "INE470Y01017") console.log("new india assurance : " +stk_tx_cnt); 
   let i=0;              
   for(;i<stk_tx_cnt.length-1;i++) {
     
@@ -362,7 +364,7 @@ function SeperateRealizedTransactions(symb, txns, dates, stk_tx_cnt) {
       
     } else {
       // 
-      alert("stock count for a transaction cannot be zero" + symb);
+      console.log("stock count for a transaction cannot be zero" + symb);
       break;
     }
 
@@ -393,10 +395,7 @@ function SeperateRealizedTransactions(symb, txns, dates, stk_tx_cnt) {
   return stockFinalTx;
 }
 
-
-
-
-function   ReadICICIDirectTransactionFile(table) {
+function   ReadICICIDirectTransactionFile(table, startdate) {
 
     let index = 1;
     let portfolio = [];
@@ -424,7 +423,9 @@ function   ReadICICIDirectTransactionFile(table) {
     let ptitrur = 0;
     let ptitrr = 0;
     
-    for(let itr=0;index<table.length;index++, itr++) {
+    let itr=0;
+    
+    for(;index<table.length;index++) {
      
       let symb = table[index][STKSYMB];
  //     let date_store = undefined;
@@ -447,166 +448,189 @@ function   ReadICICIDirectTransactionFile(table) {
                        xirr_realized : 0
                      };
       let stockTransactions = undefined;
-
+      let flag = false;
 
       // PENDING : merge transactions if on same date and same type of tx
       // PENDING : create a stock tx object and use that instead of seprate arrays
       
       stockObj.stockname = table[index][STKNAME];
+ //     console.log("reading the file: "+symb);
       
-      for (let itr2=0;index<table.length;itr2++,index++) {
-        
-        let new_date = table[index][TXDATE]; // need to be translated
-        let tx_stk_count = (table[index][TXTYPE]==="Buy"?table[index][STKQTY]:-table[index][STKQTY]);
-        let tx_value = GetTransactionValue(table[index]);
+      let itr2=0;
+      
+      for (;index<table.length;index++) {
+          
+          let new_date = TranslateExcelDate(table[index][TXDATE]); // need to be translated
+          let tx_stk_count = (table[index][TXTYPE]==="Buy"?table[index][STKQTY]:-table[index][STKQTY]);
+          let tx_value = GetTransactionValue(table[index]);
 
-        
-        if (symb === table[index][STKSYMB]) {
-          
-          // combine transactions done on same date
-          /* -- not combining tx 
-          if (date_store !== undefined && itr2 !== 0 && date_store === new_date) {
-            itr2--;
-            txns[itr2] += tx_value;
-            stock_tx_count[itr2] += tx_stk_count;
-          } else {
-          */
-            txns[itr2] = tx_value;
-            dates[itr2] = TranslateExcelDate(new_date);
-            stock_tx_count[itr2] = tx_stk_count;
-        //  date_store = new_date;
-         // }
-          
-          // count the available stocks of a particular company
-          stkcnt += tx_stk_count;
-          
-          // if end of table reached, so add the tx for current stock price and close the tx list
-          if (index === table.length-1) {
-            let NSEStockCode = table[index][STKSYMB];
-            if(NSEStockCode === undefined) {
-              console.log("Error: "+table[index][STKSYMB]+" NSE code is not available");
-              txns[itr2+1] = 0;
+            if (symb === table[index][STKSYMB]) {
+   //           if (symb === "INE470Y01017") console.log("whats the date? : "+new_date);
+              // skip all older transactions compared to start date provided
+              if (new_date >= startdate || startdate === 0) {              
+              
+                // combine transactions done on same date
+                /* -- not combining tx 
+                if (date_store !== undefined && itr2 !== 0 && date_store === new_date) {
+                  itr2--;
+                  txns[itr2] += tx_value;
+                  stock_tx_count[itr2] += tx_stk_count;
+                } else {
+                */
+ //                 console.log("Inside the belly of the beast : "+symb);
+                  if (!(stkcnt===0 && tx_stk_count < 0)) {
+                    flag = true;
+                    txns[itr2] = tx_value;
+                    dates[itr2] = new_date;
+                    stock_tx_count[itr2++] = tx_stk_count;
+                    //  date_store = new_date;
+                    // }
+                    // count the available stocks of a particular company
+                    stkcnt += tx_stk_count;
+                  }
+                  
+                // if end of table reached, so add the tx for current stock price and close the tx list
+                if (index === table.length-1 && flag === true) {
+                  let NSEStockCode = table[index][STKSYMB];
+                  if(NSEStockCode === undefined) {
+                    console.log("Error: "+table[index][STKSYMB]+" NSE code is not available");
+                    txns[itr2] = 0;
+                  } else {
+                    if(priceList !== undefined) {
+                      // if (symb === "INE412U01017") { console.log("the end : PriceList is defined"); }
+                      stockYestPrice = findYestPrice(table[index][STKSYMB]);
+                      txns[itr2] = stockYestPrice*stkcnt;
+                    } else {
+                      // console.log("shouldn't come here");
+                      txns[itr2] = table[index][STKPRICE]*stkcnt;
+                    }
+                  }
+                  dates[itr2] = myDate; 
+                  stock_tx_count[itr2] = -stkcnt;
+                }
+              } 
+            } else if (flag === true) {
+              // stock of different company found, so add the tx for current stock price and close the tx list
+              index--;
+              let NSEStockCode = table[index][STKSYMB];
+              if(NSEStockCode === undefined) {
+                console.log("Error: "+table[index][STKSYMB]+" NSE code is not available");
+                txns[itr2] = 0;
+              } else {
+                if(priceList !== undefined) {
+                    stockYestPrice = findYestPrice(table[index][STKSYMB]);
+                    txns[itr2] = stockYestPrice*stkcnt;
+                    //if (symb === "INE412U01017") { console.log("next stock : PriceList is defined : code= "+code+" count: "+stkcnt); }
+                  } else {
+                    //console.log("shouldn't come here");
+                    txns[itr2] = table[index][STKPRICE]*stkcnt;
+                  }
+              }
+              dates[itr2] = myDate;
+              stock_tx_count[itr2] = -stkcnt;
+              break;
             } else {
-              if(priceList !== undefined) {
-                // if (symb === "INE412U01017") { console.log("the end : PriceList is defined"); }
-                stockYestPrice = findYestPrice(table[index][STKSYMB]);
-                txns[itr2+1] = stockYestPrice*stkcnt;
-              } else {
-                // console.log("shouldn't come here");
-                txns[itr2+1] = table[index][STKPRICE]*stkcnt;
-              }
+              index--;
+              break;
             }
-            dates[itr2+1] = myDate; 
-            stock_tx_count[itr2+1] = -stkcnt;
-          }
-        } else {
-          // stock of different company found, so add the tx for current stock price and close the tx list
-          index--;
-          let NSEStockCode = table[index][STKSYMB];
-          if(NSEStockCode === undefined) {
-            console.log("Error: "+table[index][STKSYMB]+" NSE code is not available");
-            txns[itr2] = 0;
-          } else {
-            if(priceList !== undefined) {
-                stockYestPrice = findYestPrice(table[index][STKSYMB]);
-                txns[itr2] = stockYestPrice*stkcnt;
-                //if (symb === "INE412U01017") { console.log("next stock : PriceList is defined : code= "+code+" count: "+stkcnt); }
-              } else {
-                //console.log("shouldn't come here");
-                txns[itr2] = table[index][STKPRICE]*stkcnt;
-              }
-          }
-          dates[itr2] = myDate;
-          stock_tx_count[itr2] = -stkcnt;
-          break;
-        }
-      }
-     
-     
-     // bifurcate realized and unrealized transactions
-     stockTransactions = SeperateRealizedTransactions(symb, txns, dates, stock_tx_count);
-
-     // copy all portfolio transaction values
-     for(let i=0;i<stock_tx_count.length;ptitrol++,i++) {
-       pT.txns[ptitrol] = txns[i];
-       pT.dates[ptitrol] = dates[i];
-     }
-     for(let i=0;i<stockTransactions.stkcnt.length;i++,ptitrur++) {
-       pT.ur_txns[ptitrur] = stockTransactions.txns[i];
-       pT.ur_dates[ptitrur] = stockTransactions.dates[i];
-       pT.ur_stkcnt[ptitrur] = stockTransactions.stkcnt[i];
-     }
-     for(let i=0;i<stockTransactions.r_stkcnt.length;i++,ptitrr++) {
-       pT.r_txns[ptitrr] = stockTransactions.r_txns[i];
-       pT.r_dates[ptitrr] = stockTransactions.r_dates[i];
-       pT.r_stkcnt[ptitrr] = stockTransactions.r_stkcnt[i];
-     }
-
-/*
-     if (symb === "INE528G01027") {
-       console.log("txns : "+txns+"\n dates: "+dates+"\n stock tx count "+stock_tx_count);
-       console.log("Unrealized stockTransactions : "+stockTransactions.txns+stockTransactions.dates+stockTransactions.stkcnt);
-       console.log("Realized stockTransactions : "+stockTransactions.r_txns+stockTransactions.r_dates+stockTransactions.r_stkcnt);
-     }
-*/
-
-      stockObj.symbol = symb;
-      stockID++;
-      stockObj.id = stockID;
-      stockObj.stockcount = stkcnt;
-      stockObj.xirr_overall = GetXIRR(symb,txns,dates);
-      
-      //Get the period for unrealized transactions
-      let stock_cost=0;
-      if (stockTransactions.dates.length !== 0) {
-        let lastDateIndex = stockTransactions.dates.length - 1;
-        stockObj.period = precisionRound((stockTransactions.dates[lastDateIndex] - stockTransactions.dates[0])/(1000*60*60*24*365), 2);
-        for(let i=0; i< stockTransactions.stkcnt.length - 1; i++) {
-          stock_cost += stockTransactions.txns[i];
-        }
-        if (stkcnt !== 0) {
-          stockObj.avgcostprice = precisionRound(-stock_cost/stkcnt,2);
         } 
+     
+    // console.log("whole summary : "+txns+dates+stock_tx_count);
+     
+//     console.log("is there any length? : "+txns.length);
+ //    console.log("what is the index : "+index);
+     
+     if (txns.length !== 0) {
+      // console.log("transactions for this script");
+
+     
+       // bifurcate realized and unrealized transactions
+       stockTransactions = SeperateRealizedTransactions(symb, txns, dates, stock_tx_count);
+  
+       // copy all portfolio transaction values
+       for(let i=0;i<stock_tx_count.length;ptitrol++,i++) {
+         pT.txns[ptitrol] = txns[i];
+         pT.dates[ptitrol] = dates[i];
+       }
+       for(let i=0;i<stockTransactions.stkcnt.length;i++,ptitrur++) {
+         pT.ur_txns[ptitrur] = stockTransactions.txns[i];
+         pT.ur_dates[ptitrur] = stockTransactions.dates[i];
+         pT.ur_stkcnt[ptitrur] = stockTransactions.stkcnt[i];
+       }
+       for(let i=0;i<stockTransactions.r_stkcnt.length;i++,ptitrr++) {
+         pT.r_txns[ptitrr] = stockTransactions.r_txns[i];
+         pT.r_dates[ptitrr] = stockTransactions.r_dates[i];
+         pT.r_stkcnt[ptitrr] = stockTransactions.r_stkcnt[i];
+       }
+
+  
+  /*
+       if (symb === "INE528G01027") {
+         console.log("txns : "+txns+"\n dates: "+dates+"\n stock tx count "+stock_tx_count);
+         console.log("Unrealized stockTransactions : "+stockTransactions.txns+stockTransactions.dates+stockTransactions.stkcnt);
+         console.log("Realized stockTransactions : "+stockTransactions.r_txns+stockTransactions.r_dates+stockTransactions.r_stkcnt);
+       }
+  */
+  
+        stockObj.symbol = symb;
+        stockID++;
+        stockObj.id = stockID;
+        stockObj.stockcount = stkcnt;
+        stockObj.xirr_overall = GetXIRR(symb,txns,dates);
+        
+        //Get the period for unrealized transactions
+        let stock_cost=0;
+        if (stockTransactions.dates.length !== 0) {
+          let lastDateIndex = stockTransactions.dates.length - 1;
+          stockObj.period = precisionRound((stockTransactions.dates[lastDateIndex] - stockTransactions.dates[0])/(1000*60*60*24*365), 2);
+          for(let i=0; i< stockTransactions.stkcnt.length - 1; i++) {
+            stock_cost += stockTransactions.txns[i];
+          }
+  //        if (symb === "INE470Y01017") console.log(stock_cost); 
+          if (stkcnt !== 0) {
+            stockObj.avgcostprice = precisionRound(-stock_cost/stkcnt,2);
+          } 
+        } 
+        
+        let profit = (stockYestPrice*stkcnt) + stock_cost
+        stockObj.unrealizedprofit = precisionRound(profit, 0);
+        
+        if (stock_cost !== 0 && stkcnt !== 0) {
+          stockObj.absolutereturn = precisionRound((stockObj.unrealizedprofit*100/ (-stock_cost)),2);
+          stockObj.xirr_unrealized = GetXIRR(symb,stockTransactions.txns,stockTransactions.dates);     
+        } else if (stkcnt !== 0) {
+          stockObj.absolutereturn = "1000";
+          stockObj.xirr_unrealized = "1000";
+        }
+   
+        stockObj.currentmarketprice = stockYestPrice;
+        
+        if (stkcnt === 0) {
+          stockObj.xirr_realized = stockObj.xirr_overall;
+        } else if (stockTransactions.r_stkcnt.length !== 0) {
+          stockObj.xirr_realized = GetXIRR(symb,stockTransactions.r_txns,stockTransactions.r_dates);
+        } else {
+          // if realized xirr = 0 then unrealized xirr = overall xirr
+        }
+        
+        /*
+        if (symb === 'INE018I01017') {
+          console.log(stockObj);
+        }
+        */ 
+        
+        /*
+        if (stkcnt !== 0 && stockObj.xirr_overall !== 0 && stockObj.xirr_unrealized !== 1000) {
+          portfolio[itr] = stockObj;
+        } else {
+          itr--;
+        } */
+//        console.log(stockObj);
+        portfolio[itr++] = stockObj;
       } 
-      
-      let profit = (stockYestPrice*stkcnt) + stock_cost
-      stockObj.unrealizedprofit = precisionRound(profit, 0);
-      
-      if (stock_cost !== 0 && stkcnt !== 0) {
-        stockObj.absolutereturn = precisionRound((stockObj.unrealizedprofit*100/ (-stock_cost)),2);
-        stockObj.xirr_unrealized = GetXIRR(symb,stockTransactions.txns,stockTransactions.dates);     
-      } else if (stkcnt !== 0) {
-        stockObj.absolutereturn = "1000";
-        stockObj.xirr_unrealized = "1000";
-      }
- 
-      stockObj.currentmarketprice = stockYestPrice;
-      
-      if (stkcnt === 0) {
-        stockObj.xirr_realized = stockObj.xirr_overall;
-      } else if (stockTransactions.r_stkcnt.length !== 0) {
-        stockObj.xirr_realized = GetXIRR(symb,stockTransactions.r_txns,stockTransactions.r_dates);
-      } else {
-        // if realized xirr = 0 then unrealized xirr = overall xirr
-      }
-      
-      /*
-      if (symb === 'INE018I01017') {
-        console.log(stockObj);
-      }
-      */ 
-      
-      /*
-      if (stkcnt !== 0 && stockObj.xirr_overall !== 0 && stockObj.xirr_unrealized !== 1000) {
-        portfolio[itr] = stockObj;
-      } else {
-        itr--;
-      } */
-      
-      portfolio[itr] = stockObj;
     }
     overallPortfolio = pT;
-    
+    //console.log (portfolio);
     return portfolio;
   }
   
@@ -693,6 +717,15 @@ function   ReadICICIDirectTransactionFile(table) {
       return result;
   }
   
+function processICICIDirectTransactionFile(startdate) {
+     
+     stock = ReadICICIDirectTransactionFile(stocktxtable, startdate);
+                
+     stock = mergeSort(stock);
+                
+     stock = AddPortfolioXIRR(stock);
+}
+  
 class Save extends React.Component {
   constructor(props) {
     super(props);
@@ -724,14 +757,20 @@ class Save extends React.Component {
 export class FileInput extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {fileLoad: 0};
-    this.handleSubmit = this.handleSubmit.bind(this);
+    this.state = {fileLoad: 0, dateUpdate: false};
+    this.handleFileSubmit = this.handleFileSubmit.bind(this);
+    this.handleDateSubmit = this.handleDateSubmit.bind(this);
     this.fileUpload = this.fileUpload.bind(this);
+    this.dateUpdate = this.dateUpdate.bind(this);
     this.readFile = this.readFile.bind(this);
   }
   
   fileUpload(state) {
     this.setState({fileLoad: state});
+  }
+  
+  dateUpdate(state) {
+    this.setState({dateUpdate: true});
   }
   
   readFile(file1, filetype) {
@@ -764,12 +803,8 @@ export class FileInput extends React.Component {
               console.log(movie_images);
 
             } else if (filetype === 2) {
-               
-                stock = ReadICICIDirectTransactionFile(table);
-                
-                stock = mergeSort(stock);
-                
-                stock = AddPortfolioXIRR(stock);
+                stocktxtable = table;
+                processICICIDirectTransactionFile(0);
                 
                 //console.log(stock);
                 
@@ -912,7 +947,30 @@ export class FileInput extends React.Component {
   }
 
 
-  handleSubmit(event) {
+  handleDateSubmit(event) {
+    event.preventDefault();
+    console.log("Date Input received" +this.dateInput.value);
+    let inputdate = this.dateInput.value;
+    let today = new Date();
+    today.setHours(0,0,0,0);
+    let startdate = new Date(inputdate);
+    startdate.setHours(0,0,0,0);
+
+    if (isNaN(startdate.getTime())) { alert("Invalid Date"); return;}
+    
+    if (startdate > today) {
+      alert("Enter older dates");
+    } else {
+      if(this.state.fileLoad >= 1 && this.state.fileLoad < 10) {
+         processICICIDirectTransactionFile(startdate);
+         this.timerID = setInterval(() => {this.dateUpdate(!this.state.dateUpdate);}, 1000); 
+      } else {
+         alert("Load Transactions File First!!");
+      }
+    }
+  }
+  
+  handleFileSubmit(event) {
     event.preventDefault();
     
     let file1 = this.fileInput.files[0];
@@ -1005,7 +1063,7 @@ export class FileInput extends React.Component {
     
     return (
       <div>
-        <form className="fileinputstyle" onSubmit={this.handleSubmit}>
+        <form className="fileinputstyle" onSubmit={this.handleFileSubmit}>
           <label>
             {msg}
             <a className={showlinkClass} href={nse_feed_url}>
@@ -1019,6 +1077,15 @@ export class FileInput extends React.Component {
                 this.fileInput = input;
               }}
             />
+          </label>
+          <button type="submit">Submit</button>
+        </form>
+        <form className="startdateinputstyle" onSubmit={this.handleDateSubmit}>
+          <label>
+            <a>
+              Enter Start Date : 
+            </a>
+            <input type="date" ref={input=> {this.dateInput = input;}} />
           </label>
           <button type="submit">Submit</button>
         </form>
