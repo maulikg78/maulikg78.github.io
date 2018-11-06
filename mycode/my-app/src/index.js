@@ -2,11 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Carousel from './Carousel';
 import './index.css';
-import registerServiceWorker from './registerServiceWorker';
+//import registerServiceWorker from './registerServiceWorker';
 
 
 ReactDOM.render(<Carousel />, document.getElementById('carouselactions'));
-registerServiceWorker();
+//registerServiceWorker();
 
 /*
 function GetDate_YYYYMMDD_withDash2(myDate) {
