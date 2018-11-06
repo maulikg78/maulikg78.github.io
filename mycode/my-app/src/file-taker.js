@@ -1,11 +1,9 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import * as XLSX from 'xlsx';
 import Card from './Card';
 import Row from './Row';
 import './Card.css';
 import './Carousel.css';
-import {JSZip} from 'jszip';
 
 let stock=undefined;
 let priceList=undefined;
@@ -239,7 +237,8 @@ function findYestPrice(stkcode) {
     }
     return 0;
 }
-  
+
+/*  
 function    GetDate_YYYYMMDD_withDash() {
      let myDate = new Date();
      let date = myDate.getDate();
@@ -250,6 +249,7 @@ function    GetDate_YYYYMMDD_withDash() {
      let date_key = year + "-" + month + "-" + date;   
      return date_key;
   }
+*/
 
 function SeperateRealizedTransactions(symb, txns, dates, stk_tx_cnt) {
   let stockTx = {
@@ -439,7 +439,9 @@ function   ReadICICIDirectTransactionFile(table, startdate) {
                        stockname: "Adani Ports",
                        stockcount: 0,
                        avgcostprice : 0,
+                       totalcostprice: 0,
                        currentmarketprice : 0,
+                       totalvalue: 0,
                        unrealizedprofit : 0,
                        xirr_unrealized : 0,
                        period: 0,
@@ -589,10 +591,12 @@ function   ReadICICIDirectTransactionFile(table, startdate) {
   //        if (symb === "INE470Y01017") console.log(stock_cost); 
           if (stkcnt !== 0) {
             stockObj.avgcostprice = precisionRound(-stock_cost/stkcnt,2);
+            stockObj.totalcostprice = -precisionRound(stock_cost, 0); 
           } 
         } 
         
-        let profit = (stockYestPrice*stkcnt) + stock_cost
+        stockObj.totalvalue = precisionRound(stockYestPrice*stkcnt, 0);
+        let profit = (stockYestPrice*stkcnt) + stock_cost;
         stockObj.unrealizedprofit = precisionRound(profit, 0);
         
         if (stock_cost !== 0 && stkcnt !== 0) {
@@ -642,7 +646,9 @@ function   ReadICICIDirectTransactionFile(table, startdate) {
                  stockname: symb,
                  stockcount: "-",
                  avgcostprice: "-",
+                 totalcostprice: 0,
                  currentmarketprice : "-",
+                 totalvalue: 0,
                  unrealizedprofit : 0,
                  xirr_unrealized : 0,
                  period: "-",
@@ -670,9 +676,13 @@ function   ReadICICIDirectTransactionFile(table, startdate) {
         profit += portfolio[i].unrealizedprofit;
       }
       
+      stockObj.totalcostprice = -precisionRound(stock_cost, 0); 
+      
       stockObj.xirr_overall = GetXIRR(symb,overallPortfolio.txns,overallPortfolio.dates);
       stockObj.unrealizedprofit = precisionRound(profit, 0);
       stockObj.absolutereturn = precisionRound((profit*100/ (-stock_cost)),2);
+      
+      stockObj.totalvalue = stockObj.totalcostprice + stockObj.unrealizedprofit; 
 
 
       stockObj.xirr_unrealized = GetXIRR(symb,overallPortfolio.ur_txns,overallPortfolio.ur_dates);
@@ -1003,7 +1013,9 @@ export class FileInput extends React.Component {
                        stockname: "Stock Name",
                        stockcount: "Qty",
                        avgcostprice: "Avg Cost Price",
+                       totalcostprice: "Total Cost",
                        currentmarketprice: "Current Mkt Price",
+                       totalvalue: "Total Value",
                        unrealizedprofit: "Unrealized Profit",
                        xirr_unrealized: "XIRR(%)",
                        period: "Holding Period(Yrs)",

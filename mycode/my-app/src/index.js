@@ -1,17 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
 import Carousel from './Carousel';
+import './index.css';
 import registerServiceWorker from './registerServiceWorker';
-//import parseXlsx from 'excel';
-import * as XLSX from 'xlsx';
-import zip from 'jszip';
+
 
 ReactDOM.render(<Carousel />, document.getElementById('carouselactions'));
 registerServiceWorker();
 
-
+/*
 function GetDate_YYYYMMDD_withDash2(myDate) {
 
    let date = myDate.getDate();
@@ -22,19 +19,19 @@ function GetDate_YYYYMMDD_withDash2(myDate) {
    let date_key = year + "-" + month + "-" + date;   
    return date_key;
   }
+*/
 
-
-
+/*
 async function GetStockQuotes(id, stockcode) {
    try {
    let av_api_key = "2O5D20VZB8TTSDJR";
- //  https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=1min&apikey=demo
+   let url1 = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=1min&apikey=demo";
    let av_url_start = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=";
    let av_url_end = "&interval=1min&apikey="+av_api_key;
    
    let url = av_url_start+stockcode+av_url_end;
    
- /*  let date_key = GetDate_YYYYMMDD_withDash(); */
+  let date_key = GetDate_YYYYMMDD_withDash(); 
    let keyOne = "Time Series (Daily)";
    let keyTwo = "4. close";
    let docKey = "myStock"+id;
@@ -46,10 +43,10 @@ async function GetStockQuotes(id, stockcode) {
    if(response.ok) {
      let jsonResponse = await response.json();
      console.log(jsonResponse);
-   //  console.log(jsonResponse[keyOne][date_key][keyTwo]);
-  //   document.getElementById(docKey).innerHTML = jsonResponse[keyOne][date_key][keyTwo];
+     console.log(jsonResponse[keyOne][date_key][keyTwo]);
+     document.getElementById(docKey).innerHTML = jsonResponse[keyOne][date_key][keyTwo];
      
-     // console.log(jsonResponse["Time Series (Daily)"][date_key]["1. open"]);
+      console.log(jsonResponse["Time Series (Daily)"][date_key]["1. open"]);
      return jsonResponse;
    }
    throw new Error('Request failed');
@@ -58,7 +55,7 @@ async function GetStockQuotes(id, stockcode) {
   }
 }
 
-
+*/
 
 
 /* async function GetEODStockPrice(symbol,myDate) {
@@ -82,7 +79,7 @@ async function GetStockQuotes(id, stockcode) {
 }
 */
 
-
+/*
 
 function FindTop3Stocks(stock) {
   let obj,obj1,obj2,obj3 = undefined;
@@ -91,13 +88,6 @@ function FindTop3Stocks(stock) {
   
   obj1=obj2=obj3=stock[0];
   obj1.xirr = obj2.xirr = obj3.xirr = 0;
-  
-  console.log(stock);
-
-  for(;itr<stock.length;itr++) {
-    
-    
-    if (stock[itr].stockcount <= 1) { continue; }
     
     obj = stock[itr];
     
@@ -122,6 +112,6 @@ function FindTop3Stocks(stock) {
 //  console.log(object);
   return object;
 }
-
+*/
 
 

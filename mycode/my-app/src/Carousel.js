@@ -1,7 +1,6 @@
 import React from 'react';
 import './Carousel.css';
 import FileInput from './file-taker';
-import Row from './Row';
 import './Card.css';
 
 const dot="dot";
@@ -64,7 +63,7 @@ export class Carousel extends React.Component {
           <div className="text">My Route</div>
           <div className="tile-box2 cards">
             <p> From Home to Office using Google maps </p>
-            <iframe id="maps" className ="maps" src="https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d482676.05143371545!2d72.74198573346584!3d19.067841431681888!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e0!4m5!1s0x3be7c3a9e4ecbad3%3A0x9fb938081011325f!2sNeelsidhi+Splendour%2C+Sector+15%2C+CBD+Belapur%2C+Navi+Mumbai%2C+Maharashtra+400614%2C+India!3m2!1d19.0086759!2d73.03476739999999!4m5!1s0x3be7c0beddab5c77%3A0xd2f7874862ef69dd!2sReliance+Corporate+Park%2C+MIDC%2C+Ghansoli%2C+Navi+Mumbai%2C+Maharashtra+400701%2C+India!3m2!1d19.1275105!2d73.0076079!5e0!3m2!1sen!2sin!4v1515140868072" frameBorder="0" allowFullScreen></iframe>
+            <iframe id="maps" className ="maps" title="MyMap" src="https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d482676.05143371545!2d72.74198573346584!3d19.067841431681888!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e0!4m5!1s0x3be7c3a9e4ecbad3%3A0x9fb938081011325f!2sNeelsidhi+Splendour%2C+Sector+15%2C+CBD+Belapur%2C+Navi+Mumbai%2C+Maharashtra+400614%2C+India!3m2!1d19.0086759!2d73.03476739999999!4m5!1s0x3be7c0beddab5c77%3A0xd2f7874862ef69dd!2sReliance+Corporate+Park%2C+MIDC%2C+Ghansoli%2C+Navi+Mumbai%2C+Maharashtra+400701%2C+India!3m2!1d19.1275105!2d73.0076079!5e0!3m2!1sen!2sin!4v1515140868072" frameBorder="0" allowFullScreen></iframe>
           </div>
         </div>
         
@@ -76,14 +75,14 @@ export class Carousel extends React.Component {
          <div className={slide_class[3]}>
           <div className="text">Shark Attack</div>
           <div className="tile-box2">
-            <img src="/images/shark.jpg" />
+            <img src="/images/shark.jpg" alt="courtsey - learn enough"/>
           </div>
         </div>
         
         <div className={slide_class[4]}>
           <div className="text">I Love Kittens</div>
           <div className="tile-box2">
-            <img src="/images/kitten.jpg" />
+            <img src="/images/kitten.jpg" alt="courtsey - learn enough"/>
           </div>
         </div>
       

@@ -18,7 +18,9 @@ export class Row extends React.Component {
       <Item item={this.props.stockObj.stockname} id={id} type='name' bkgdColor={bkgdColor}/>
       <Item item={this.props.stockObj.stockcount} id={id} type='count' bkgdColor={bkgdColor}/>
       <Item item={this.props.stockObj.avgcostprice} id={id} type='number' bkgdColor={bkgdColor}/>
+      <Item item={this.props.stockObj.totalcostprice} id={id} type='number' bkgdColor={bkgdColor}/>
       <Item item={this.props.stockObj.currentmarketprice} id={id} type='number' bkgdColor={bkgdColor}/>
+      <Item item={this.props.stockObj.totalvalue} id={id} type='number' bkgdColor={bkgdColor}/>
       <Item item={this.props.stockObj.unrealizedprofit} id={id} type='number' bkgdColor={bkgdColor}/>
       <Item item={this.props.stockObj.period} id={id} type='count' bkgdColor={bkgdColor}/>
       <Item item={this.props.stockObj.absolutereturn} id={id} type='number' bkgdColor={bkgdColor}/>
