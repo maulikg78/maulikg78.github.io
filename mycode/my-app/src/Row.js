@@ -13,16 +13,17 @@ export class Row extends React.Component {
       bkgdColor = 'orange';
     } 
     
+ 
     return (
     <li className="rows">
       <Item item={this.props.stockObj.stockname} id={id} type='name' bkgdColor={bkgdColor}/>
-      <Item item={this.props.stockObj.stockcount} id={id} type='count' bkgdColor={bkgdColor}/>
+      <Item item={this.props.stockObj.stockcount} id={id} type='number' bkgdColor={bkgdColor}/>
       <Item item={this.props.stockObj.avgcostprice} id={id} type='number' bkgdColor={bkgdColor}/>
       <Item item={this.props.stockObj.totalcostprice} id={id} type='number' bkgdColor={bkgdColor}/>
       <Item item={this.props.stockObj.currentmarketprice} id={id} type='number' bkgdColor={bkgdColor}/>
       <Item item={this.props.stockObj.totalvalue} id={id} type='number' bkgdColor={bkgdColor}/>
       <Item item={this.props.stockObj.unrealizedprofit} id={id} type='number' bkgdColor={bkgdColor}/>
-      <Item item={this.props.stockObj.period} id={id} type='count' bkgdColor={bkgdColor}/>
+      <Item item={this.props.stockObj.period} id={id} type='number' bkgdColor={bkgdColor}/>
       <Item item={this.props.stockObj.absolutereturn} id={id} type='number' bkgdColor={bkgdColor}/>
       <Item item={this.props.stockObj.xirr_unrealized} id={id} type='number' bkgdColor={bkgdColor}/>
       <Item item={this.props.stockObj.xirr_overall} id={id} type='number' bkgdColor={bkgdColor}/>
@@ -43,6 +44,7 @@ export class Item extends React.Component {
       fontSize: 10,
       //      minWidth: 50,
       width: 50,
+      whiteSpace: 'nowrap',
       padding: 5,
       margin: 1,
       textAlign: 'right',
@@ -53,21 +55,23 @@ export class Item extends React.Component {
       backgroundColor: this.props.bkgdColor
     };
     
+    var item = this.props.item;
    
     if (this.props.id === 0) {
       // process Header row
       ItemStyle.textAlign = 'center';
       ItemStyle.fontWeight = 'bold';
       ItemStyle.height = 40;
+      ItemStyle.whiteSpace = 'wrap';
     } else {
       if (this.props.id === 1000) {
         ItemStyle.fontWeight = 'bold';
       }
       if (this.props.type === 'number') {
         ItemStyle.color = (this.props.item < 0)?'red':'black';
-      } else if (this.props.type === 'count') {
-        ItemStyle.textAlign = 'center';
-      } else {
+        item = item.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+      else {
         ItemStyle.textAlign = 'left';
         ItemStyle.width = 200;
       }
@@ -78,7 +82,7 @@ export class Item extends React.Component {
     }
    
    return (
-    <p style={ItemStyle}>{this.props.item}</p>  
+    <p style={ItemStyle}>{item}</p>  
     );
   }
 }

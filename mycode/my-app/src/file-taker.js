@@ -13,6 +13,7 @@ let movie_images=[];
 const PRICEKEY="bhav";
 const PORTFOLIOKEY="PortFolio";
 const MOVIEKEY="Ratings";
+const MFKEY="MF";
 
 function GetTodayBhavCopy() {
  // try { 
@@ -188,50 +189,37 @@ function GetXIRR(symbol, values, dates) {
   return precisionRound(rate*100, precision);
 }
 
-function  GetTransactionValue(tx) {
-    let value = 0;
-    //table reader
-    const TXTYPE = 3;
-    const STKQTY = 4;
-    const STKCOST = 5;
+function  GetTransactionValue(tx, type = "EQ", sign) {
+  
+    //table reader for EQ and MF file 
+    const STKQTY=(type === "EQ"?4:10);
+    const STKCOST = (type === "EQ"?5:5);
+    
     const BRKG = 6;
     const TXCHG = 7;
     const STPDTY = 8;
     
     let tx_val = tx[STKQTY]*tx[STKCOST];
-    let charges = tx[BRKG] + tx[TXCHG] + tx[STPDTY];
     
-    if (tx[TXTYPE] === "Buy") {
-      value = -(tx_val + charges);
-    } else if (tx[TXTYPE] === "Sell") {
-      value = tx_val - charges; 
-    } else {
-      console.log("Invalid Transaction Type Error");
-    }
-    return value;
+    // charges get added to the price in case of BUY and subtracted in case of SELL
+    let charges = sign*(type === "EQ"? (tx[BRKG] + tx[TXCHG] + tx[STPDTY]):0);
+    
+    // in case of MF the charges will any be O so it doesn't matter value will always be equal to tx_val
+    return tx_val + charges;
   }
 
 function TranslateExcelDate(date) {
     return new Date((date - (25567+2))*86400*1000);
   }
 
-function findYestPrice(stkcode) {
+function findYestPrice(stkcode, type) {
     
-    const STKCODE = 12;
-    const DAYLASTPRICE = 6;
+    // updated to read EQ - bhavcopy file and MF - created file 
+    const STKCODE = (type === "EQ"?12:0);
+    const DAYLASTPRICE = (type === "EQ"?6:2);
     
     for(let itr=0; itr<priceList.length; itr++) {
-      /*
-      if(stkcode === "INE412U01017") {
-        console.log("PriceList scroll"+ priceList[itr][STKCODE]);
-      }
-      */
       if (priceList[itr][STKCODE] === stkcode) {
-        /*
-        if (stkcode === "INE412U01017") {
-          console.log("price "+priceList[itr][DAYLASTPRICE]+ " counter "+itr);
-        }
-        */
         return priceList[itr][DAYLASTPRICE];
       } 
     }
@@ -395,19 +383,22 @@ function SeperateRealizedTransactions(symb, txns, dates, stk_tx_cnt) {
   return stockFinalTx;
 }
 
-function   ReadICICIDirectTransactionFile(table, startdate) {
+function   ReadICICIDirectTransactionFile(table, startdate, type="EQ") {
 
     let index = 1;
     let portfolio = [];
     let myDate = new Date();
     let stockID = 0;
+    
     //table reader
-    const STKSYMB=2;
-    const STKNAME=1;
-    const TXDATE=12;
-    const TXTYPE=3;
-    const STKQTY=4;
-    const STKPRICE=15;
+    const STKSYMB=(type === "EQ"?2:4);
+    const STKNAME=(type === "EQ"?1:4);
+    const TXDATE=(type === "EQ"?12:6);
+    const TXTYPE=(type === "EQ"?3:2);
+    const STKQTY=(type === "EQ"?4:10);
+    const STKPRICE=(type === "EQ"?15:15); 
+    
+    
     let stockYestPrice = undefined;
     let pT = {
                txns: [],
@@ -463,9 +454,30 @@ function   ReadICICIDirectTransactionFile(table, startdate) {
       for (;index<table.length;index++) {
           
           let new_date = TranslateExcelDate(table[index][TXDATE]); // need to be translated
-          let tx_stk_count = (table[index][TXTYPE]==="Buy"?table[index][STKQTY]:-table[index][STKQTY]);
-          let tx_value = GetTransactionValue(table[index]);
-
+          // 27 March 2019 - check the transaction type for MF and EQ differently
+          let sign = -1; 
+          
+          switch (table[index][TXTYPE]) {
+            
+            case "Buy"          :
+            case "Purchase"     :
+            case "Purchase-SIP" :
+            case "SI"           : sign = 1;
+                                  break;
+            case "Sell"         :
+            case "SO"           :
+            case "Redemption"   : break;
+            default             : console.log("Error - shouldn't come here");
+          }
+          let tx_stk_count = sign*table[index][STKQTY];
+         
+          let tx_value = -sign*GetTransactionValue(table[index], type, sign);
+          
+          if (symb === "HDFC Money Market Fund - Regular Plan - Growth") {
+            console.log("stock count "+tx_stk_count+" tx value "+tx_value+" sign "+sign);
+          }
+          
+          
             if (symb === table[index][STKSYMB]) {
    //           if (symb === "INE470Y01017") console.log("whats the date? : "+new_date);
               // skip all older transactions compared to start date provided
@@ -500,7 +512,7 @@ function   ReadICICIDirectTransactionFile(table, startdate) {
                   } else {
                     if(priceList !== undefined) {
                       // if (symb === "INE412U01017") { console.log("the end : PriceList is defined"); }
-                      stockYestPrice = findYestPrice(table[index][STKSYMB]);
+                      stockYestPrice = findYestPrice(table[index][STKSYMB], type);
                       txns[itr2] = stockYestPrice*stkcnt;
                     } else {
                       // console.log("shouldn't come here");
@@ -520,7 +532,7 @@ function   ReadICICIDirectTransactionFile(table, startdate) {
                 txns[itr2] = 0;
               } else {
                 if(priceList !== undefined) {
-                    stockYestPrice = findYestPrice(table[index][STKSYMB]);
+                    stockYestPrice = findYestPrice(table[index][STKSYMB], type);
                     txns[itr2] = stockYestPrice*stkcnt;
                     //if (symb === "INE412U01017") { console.log("next stock : PriceList is defined : code= "+code+" count: "+stkcnt); }
                   } else {
@@ -577,27 +589,28 @@ function   ReadICICIDirectTransactionFile(table, startdate) {
         stockObj.symbol = symb;
         stockID++;
         stockObj.id = stockID;
-        stockObj.stockcount = stkcnt;
+        stockObj.stockcount = (type === "MF")?stkcnt.toFixed(2): stkcnt;
         stockObj.xirr_overall = GetXIRR(symb,txns,dates);
         
-        //Get the period for unrealized transactions
         let stock_cost=0;
-        if (stockTransactions.dates.length !== 0) {
+        let profit=0;
+        //Get the period and total cost for unrealized transactions
+   
+        if (stockTransactions.dates.length !== 0 && stkcnt !== 0) {
           let lastDateIndex = stockTransactions.dates.length - 1;
           stockObj.period = precisionRound((stockTransactions.dates[lastDateIndex] - stockTransactions.dates[0])/(1000*60*60*24*365), 2);
           for(let i=0; i< stockTransactions.stkcnt.length - 1; i++) {
             stock_cost += stockTransactions.txns[i];
           }
-  //        if (symb === "INE470Y01017") console.log(stock_cost); 
-          if (stkcnt !== 0) {
-            stockObj.avgcostprice = precisionRound(-stock_cost/stkcnt,2);
-            stockObj.totalcostprice = -precisionRound(stock_cost, 0); 
-          } 
-        } 
+          stockObj.avgcostprice = precisionRound(-stock_cost/stkcnt,2);
+          stockObj.totalcostprice = -precisionRound(stock_cost, 0); 
+        }
         
-        stockObj.totalvalue = precisionRound(stockYestPrice*stkcnt, 0);
-        let profit = (stockYestPrice*stkcnt) + stock_cost;
-        stockObj.unrealizedprofit = precisionRound(profit, 0);
+        if (stkcnt !== 0) {
+          stockObj.totalvalue = precisionRound(stockYestPrice*stkcnt, 0);
+          profit = (stockYestPrice*stkcnt) + stock_cost;
+          stockObj.unrealizedprofit = precisionRound(profit, 0);
+        } 
         
         if (stock_cost !== 0 && stkcnt !== 0) {
           stockObj.absolutereturn = precisionRound((stockObj.unrealizedprofit*100/ (-stock_cost)),2);
@@ -607,7 +620,7 @@ function   ReadICICIDirectTransactionFile(table, startdate) {
           stockObj.xirr_unrealized = "1000";
         }
    
-        stockObj.currentmarketprice = stockYestPrice;
+        stockObj.currentmarketprice = stockYestPrice.toFixed(2);
         
         if (stkcnt === 0) {
           stockObj.xirr_realized = stockObj.xirr_overall;
@@ -630,7 +643,25 @@ function   ReadICICIDirectTransactionFile(table, startdate) {
           itr--;
         } */
 //        console.log(stockObj);
+        //number formatting 
+       // stockObj.totalvalue = stockObj.totalvalue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      //  stockObj.unrealizedprofit = stockObj.unrealizedprofit.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         portfolio[itr++] = stockObj;
+        
+        /*
+        <Item item={this.props.stockObj.stockname} id={id} type='name' bkgdColor={bkgdColor}/>
+      <Item item={this.props.stockObj.stockcount} id={id} type='count' bkgdColor={bkgdColor}/>
+      <Item item={this.props.stockObj.avgcostprice} id={id} type='number' bkgdColor={bkgdColor}/>
+      <Item item={this.props.stockObj.totalcostprice} id={id} type='number' bkgdColor={bkgdColor}/>
+      <Item item={this.props.stockObj.currentmarketprice} id={id} type='number' bkgdColor={bkgdColor}/>
+      <Item item={this.props.stockObj.totalvalue} id={id} type='number' bkgdColor={bkgdColor}/>
+      <Item item={this.props.stockObj.unrealizedprofit} id={id} type='number' bkgdColor={bkgdColor}/>
+      <Item item={this.props.stockObj.period} id={id} type='count' bkgdColor={bkgdColor}/>
+      <Item item={this.props.stockObj.absolutereturn} id={id} type='number' bkgdColor={bkgdColor}/>
+      <Item item={this.props.stockObj.xirr_unrealized} id={id} type='number' bkgdColor={bkgdColor}/>
+      <Item item={this.props.stockObj.xirr_overall} id={id} type='number' bkgdColor={bkgdColor}/>
+      <Item item={this.props.stockObj.xirr_realized} id={id} type='number' bkgdColor={bkgdColor}/>
+        */
       } 
     }
     overallPortfolio = pT;
@@ -687,7 +718,11 @@ function   ReadICICIDirectTransactionFile(table, startdate) {
 
       stockObj.xirr_unrealized = GetXIRR(symb,overallPortfolio.ur_txns,overallPortfolio.ur_dates);
       stockObj.xirr_realized = GetXIRR(symb,overallPortfolio.r_txns,overallPortfolio.r_dates);
-
+/*
+      stockObj.totalcostprice = stockObj.totalvalue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      stockObj.totalvalue = stockObj.totalvalue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      stockObj.unrealizedprofit = stockObj.unrealizedprofit.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+   */  
       portfolio.unshift(stockObj);
 
       return portfolio;
@@ -727,9 +762,9 @@ function   ReadICICIDirectTransactionFile(table, startdate) {
       return result;
   }
   
-function processICICIDirectTransactionFile(startdate) {
+function processICICIDirectTransactionFile(startdate, type="EQ") {
      
-     stock = ReadICICIDirectTransactionFile(stocktxtable, startdate);
+     stock = ReadICICIDirectTransactionFile(stocktxtable, startdate, type);
                 
      stock = mergeSort(stock);
                 
@@ -787,6 +822,8 @@ export class FileInput extends React.Component {
     
       if (file1) {
       
+      console.log(file1.type);
+      
       if (file1.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
       file1.type === 'application/vnd.ms-excel' || file1.type === 'text/comma-separated-values') {
         // alert("EXCEL FILE");
@@ -814,7 +851,7 @@ export class FileInput extends React.Component {
 
             } else if (filetype === 2) {
                 stocktxtable = table;
-                processICICIDirectTransactionFile(0);
+                processICICIDirectTransactionFile(0, "EQ");
                 
                 //console.log(stock);
                 
@@ -844,9 +881,16 @@ export class FileInput extends React.Component {
                   document.getElementById(newtag).innerHTML = (itr+1) + ". " + top3[itr].stockname + " XIRR: " + top3[itr].xirr;
                 }
                 */
+            } else if (filetype === 4) {
+                stocktxtable = table;
+                processICICIDirectTransactionFile(0, "MF");
             } else if (filetype === 1) {
               
               priceList = table;
+              
+              // TEMP : check
+              //console.log(table);
+              
               // console.log("price loaded");
   
             } else {
@@ -903,7 +947,7 @@ export class FileInput extends React.Component {
           reader.onerror = function(error) {
             console.log(error);
           };
-    
+        
         reader.readAsBinaryString(file1);
       
         
@@ -996,6 +1040,14 @@ export class FileInput extends React.Component {
        else {
          alert("Load Price File first!!");
        }
+    } else if (FILENAME.search(MFKEY) !== -1) {
+       if(this.state.fileLoad >= 1 && this.state.fileLoad < 10) {
+         this.readFile(file1,4);
+         this.timerID = setInterval(() => {this.fileUpload(this.state.fileLoad + 1);}, 1000); 
+       }
+       else {
+         alert("Load Price File first!!");
+       }
     } else if (FILENAME.search(MOVIEKEY) !== -1) {
         // needed to be managed differently!! 
         console.log("movies_file_loading");
@@ -1009,14 +1061,14 @@ export class FileInput extends React.Component {
   render() {
     
   const header_row = { id: 0,
-                       symbol: "Stock Symbol",
-                       stockname: "Stock Name",
+                       symbol: "Stock/MF Symbol",
+                       stockname: "Stock/MF Name",
                        stockcount: "Qty",
                        avgcostprice: "Avg Cost Price",
                        totalcostprice: "Total Cost",
                        currentmarketprice: "Current Mkt Price",
                        totalvalue: "Total Value",
-                       unrealizedprofit: "Unrealized Profit",
+                       unrealizedprofit: "Profit",
                        xirr_unrealized: "XIRR(%)",
                        period: "Holding Period(Yrs)",
                        absolutereturn: "Absolute Return(%)",
